@@ -1,0 +1,19 @@
+body {
+    /* background-color: #8d18b4 !important; */
+}
+
+#booksTable th, 
+#booksTable td {
+    text-align: center;
+    vertical-align: middle; /* optional: vertically center text */
+}
+
+#genreTable td:last-child,
+#genreTable th:last-child {
+    width: 1%;
+    white-space: nowrap;
+}
+
+#genreTable tbody tr.selected {
+    background-color: #7b91ad; /* light blue highlight */
+}

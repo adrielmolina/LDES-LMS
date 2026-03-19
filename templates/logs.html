@@ -1,0 +1,53 @@
+{% extends 'base.html' %}
+
+
+{% block title %}Logs{% endblock %}
+
+
+{% block head %}
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles/logs.css') }}">
+{% endblock %}
+
+
+{% block content %}
+
+    <table id="logsTable" class="table table-striped table-hover">
+        <thead>
+            <tr>
+                <th>Log ID</th>
+                <th>Time</th>
+                <th>Action</th>
+                <th>Description</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>1</td>
+                <td>2026-03-19 12:45:10</td>
+                <td>Borrow Book</td>
+                <td>Book ID 101 borrowed by Juan Dela Cruz</td>
+            </tr>
+            <tr>
+                <td>2</td>
+                <td>2026-03-19 13:02:33</td>
+                <td>Return Book</td>
+                <td>Book ID 101 returned</td>
+            </tr>
+        </tbody>
+    </table>
+
+{% endblock %}
+
+
+{% block extra_scripts %}
+    <script>
+        
+        let logsTable = new DataTable('#logsTable', {
+            order: [[1, 'desc']], // sort by time (latest first)
+            pageLength: 10,
+        });
+
+    </script>
+    
+
+{% endblock %}

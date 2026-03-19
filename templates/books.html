@@ -1,0 +1,314 @@
+{% extends 'base.html' %}
+
+
+{% block title %}Books Management{% endblock %}
+
+
+{% block head %}
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles/books.css') }}">
+
+{% endblock %}
+
+
+{% block content %}
+    <button type="button" class="btn btn-primary">Add Book</button>
+    <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#genreOverlayModal">Add Genre</button>
+
+    <!-- Overlay Modal -->
+    <div class="modal fade" id="genreOverlayModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content p-3">
+        <!-- Search bar -->
+        <div class="mb-3">
+            <input type="text" id="genreSearch" class="form-control" placeholder="Search or add genre...">
+        </div>
+
+        <!-- Genre Table -->
+        <table class="table" id="genreTable">
+            <thead>
+            <tr>
+                <th>Genre</th>
+                <th>Actions</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr>
+                <td>Fantasy</td>
+                <td>
+                <button class="btn btn-sm btn-warning">Edit</button>
+                <button class="btn btn-sm btn-danger">Delete</button>
+                </td>
+            </tr>
+            <tr>
+                <td>Science Fiction</td>
+                <td>
+                <button class="btn btn-sm btn-warning">Edit</button>
+                <button class="btn btn-sm btn-danger">Delete</button>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+
+        <!-- Add button (dynamic) -->
+        <div class="text-end">
+            <button class="btn btn-success" id="addGenreBtn" disabled>Add Genre</button>
+        </div>
+        </div>
+    </div>
+    </div>
+
+    <table id="booksTable" class="table table-striped">
+        <thead>
+            <tr>
+                <th>Book ID</th>
+                <th>Accession Start</th>
+                <th>Accession End</th>
+                <th>ISBN</th>
+                <th>Title</th>
+                <th>Author</th>
+                <th>Illustrator</th>
+                <th>Publisher</th>
+                <th>Publication Year</th>
+                <th>Category ID</th>
+                <th>Total Copies</th>
+                <th>Available Copies</th>
+                <th>Shelf Location</th>
+                <th>Created At</th>
+                <th>Last Updated At</th>
+                <th>Key Stage Grade Level</th>
+                <th>No. of Pages</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>1</td>
+                <td>1001</td>
+                <td>1005</td>
+                <td>9781234567890</td>
+                <td>Sample Book</td>
+                <td>John Doe</td>
+                <td>Jane Smith</td>
+                <td>Sample Publisher</td>
+                <td>2026</td>
+                <td>2</td>
+                <td>10</td>
+                <td>8</td>
+                <td>Shelf A1</td>
+                <td>2026-03-18</td>
+                <td>2026-03-18</td>
+                <td>KS 1 - Kinder to Grade 3</td>
+                <td>120</td>
+            </tr>
+            <tr>
+                <td>2</td>
+                <td>1001</td>
+                <td>1005</td>
+                <td>9781234567890</td>
+                <td>Sample Book</td>
+                <td>John Doe</td>
+                <td>Jane Smith</td>
+                <td>Sample Publisher</td>
+                <td>2026</td>
+                <td>2</td>
+                <td>10</td>
+                <td>8</td>
+                <td>Shelf A1</td>
+                <td>2026-03-18</td>
+                <td>2026-03-18</td>
+                <td>KS 1 - Kinder to Grade 3</td>
+                <td>120</td>
+            </tr>
+        </tbody>
+    </table>
+
+
+    
+
+
+
+
+
+{% endblock %}
+
+
+{% block extra_scripts %}
+    <script>
+        // FOR THE BOOKS TABLE
+        let table = new DataTable('#booksTable', {
+            responsive: true,
+            paging: true,
+            searching: true,
+            ordering: true,
+            info: true,
+            scrollX: true
+        });
+
+        // FOR THE GENRE);
+
+
+        const genreModal = document.getElementById('genreOverlayModal');
+        const searchInput = document.getElementById('genreSearch');
+        const addBtn = document.getElementById('addGenreBtn');
+        const tableBody = document.querySelector('#genreTable tbody');
+
+        let selectedIndex = -1;
+
+        // Auto-focus search when modal opens
+        genreModal.addEventListener('shown.bs.modal', () => {
+            searchInput.focus();
+
+            // ✅ force selection AFTER modal fully renders
+            setTimeout(() => {
+                selectRow(0);
+            }, 50);
+        });
+
+        // Enable Add button if search input has text
+        searchInput.addEventListener('input', () => {
+        addBtn.disabled = searchInput.value.trim() === '';
+        });
+
+        // 🔹 Select row helper
+        function selectRow(index) {
+            const rows = tableBody.querySelectorAll('tr');
+
+            if (rows.length === 0) {
+                selectedIndex = -1;
+                return;
+            }
+
+            // clamp index
+            if (index < 0) index = 0;
+            if (index >= rows.length) index = rows.length - 1;
+
+            // remove previous selection
+            rows.forEach(row => row.classList.remove('selected'));
+
+            selectedIndex = index;
+
+            const selectedRow = rows[selectedIndex];
+            if (!selectedRow) return;
+
+            selectedRow.classList.add('selected');
+
+            // scroll into view
+            selectedRow.scrollIntoView({ block: 'nearest' });
+        }
+
+        // 🔹 Add genre
+        function addGenre() {
+        const value = searchInput.value.trim();
+        if (!value) return;
+
+        // API placeholder
+        console.log('API CALL: ADD', value);
+
+        const row = document.createElement('tr');
+        row.innerHTML = `
+            <td>${value}</td>
+            <td>
+            <button class="btn btn-sm btn-warning">Edit</button>
+            <button class="btn btn-sm btn-danger">Delete</button>
+            </td>`;
+        tableBody.appendChild(row);
+
+        searchInput.value = '';
+        addBtn.disabled = true;
+
+        selectRow(tableBody.children.length - 1);
+        searchInput.focus();
+        }
+
+        // 🔹 Edit selected
+        function editSelected() {
+        const rows = tableBody.querySelectorAll('tr');
+        if (selectedIndex < 0 || !rows[selectedIndex]) return;
+
+        const cell = rows[selectedIndex].children[0];
+        const current = cell.textContent;
+
+        const updated = prompt('Edit genre:', current);
+        if (updated && updated.trim() !== '') {
+            cell.textContent = updated.trim();
+
+            // API placeholder
+            console.log('API CALL: EDIT', current, '→', updated);
+        }
+        }
+
+        // 🔹 Delete selected
+        function deleteSelected() {
+        const rows = tableBody.querySelectorAll('tr');
+        if (selectedIndex < 0 || !rows[selectedIndex]) return;
+
+        const value = rows[selectedIndex].children[0].textContent;
+
+        if (confirm(`Delete "${value}"?`)) {
+            rows[selectedIndex].remove();
+
+            // API placeholder
+            console.log('API CALL: DELETE', value);
+
+            selectRow(selectedIndex - 1);
+        }
+        }
+
+        // 🔹 Button click
+        addBtn.addEventListener('click', addGenre);
+
+        // 🔹 Enter key = Add
+        searchInput.addEventListener('keypress', e => {
+        if (e.key === 'Enter') {
+            e.preventDefault();
+            addGenre();
+        }
+        });
+
+
+        let keybinds = {
+            up: 'ArrowUp',
+            down: 'ArrowDown',
+            edit: '<',
+            delete: '>'
+        };
+
+        const genreModal1 = document.getElementById('genreOverlayModal');
+
+        genreModal1.addEventListener('keydown', e => {
+        const activeEl = document.activeElement;
+        const isTyping = activeEl.tagName === 'INPUT' || activeEl.tagName === 'TEXTAREA';
+
+        // ✅ ALWAYS handle UP/DOWN (even inside input)
+        if (e.key === keybinds.up) {
+            e.preventDefault();
+            selectRow(selectedIndex - 1);
+            return;
+        }
+
+        if (e.key === keybinds.down) {
+            e.preventDefault();
+            selectRow(selectedIndex + 1);
+            return;
+        }
+
+        // ⛔ block other shortcuts while typing
+        if (isTyping) return;
+
+        // ✅ EDIT
+        if (e.key === keybinds.edit) {
+            e.preventDefault();
+            editSelected();
+        }
+
+        // ✅ DELETE
+        if (e.key === keybinds.delete) {
+            e.preventDefault();
+            deleteSelected();
+        }
+        });
+
+
+
+    </script>
+    
+{% endblock %}
