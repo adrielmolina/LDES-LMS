@@ -19,7 +19,7 @@ server.jinja_env.auto_reload = True
 server.secret_key = os.urandom(24)
 
 # CACHE CONTROL FOR STATIC FILES
-cache_bypass = True
+cache_bypass = False
 
 if cache_bypass or os.getenv("FLASK_ENV") == "production":
     server.config['SEND_FILE_MAX_AGE_DEFAULT'] = 31536000
