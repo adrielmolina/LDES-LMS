@@ -1,0 +1,18 @@
+#logsTable th,
+#logsTable td {
+    vertical-align: middle;
+    text-align: center;
+}
+
+#logsTable td:nth-child(1),
+#logsTable td:nth-child(3) {
+    text-align: center;
+}
+
+#logsTable td:nth-child(4) {
+    max-width: 300px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
