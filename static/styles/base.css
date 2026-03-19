@@ -33,6 +33,7 @@ body {
   background: var(--primary-dark);
   padding: 25px 0 25px 15px;
   transition: all 0.4s ease;
+  z-index: 1000;
 }
 
 /* Dark mode */
