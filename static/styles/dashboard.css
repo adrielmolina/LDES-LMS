@@ -1,5 +1,463 @@
-#calendar {
-    max-width: 900px;
-    margin: 0 auto;
-    height: 600px;
+/* Dashboard specific styles - works with base.css variables */
+.dashboard-title {
+    padding-bottom: 25px;
+    color: var(--text-primary);
+    font-size: 2.5rem;
+    font-weight: bolder;
+    margin: 0;
+}
+
+.dashboard-container {
+    padding: 1.5rem;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    background-color: var(--bg-body);
+}
+
+/* Dashboard Cards */
+.dashboard-card {
+    background-color: var(--bg-sidebar);
+    border-radius: 1rem;
+    padding: 1.5rem;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    height: 100%;
+    border: none;
+    opacity: 90%;
+}
+
+.dashboard-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 12px rgba(0, 0, 0, 0.2);
+}
+
+.card-icon {
+    font-size: 2.5rem;
+    background-color: var(--accent);
+    width: 60px;
+    height: 60px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 12px;
+    color: var(--text-light);
+    flex-shrink: 0;
+}
+
+.card-content {
+    flex: 1;
+    min-width: 0;
+}
+
+.card-content h3 {
+    color: var(--text-inverse);
+    font-size: 0.9rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin: 0 0 0.5rem 0;
+    opacity: 0.8;
+}
+
+.card-value {
+    color: var(--text-inverse);
+    font-size: 1.8rem;
+    font-weight: bold;
+    margin: 0 0 0.25rem 0;
+    line-height: 1.2;
+}
+
+.card-trend {
+    font-size: 0.85rem;
+    padding: 0.25rem 0.5rem;
+    border-radius: 1rem;
+    background-color: rgba(0, 0, 0, 0.05);
+    display: inline-block;
+}
+
+.card-trend.positive {
+    color: #10b981;
+}
+
+.card-trend.negative {
+    color: #ef4444;
+}
+
+/* Calendar Card */
+.calendar-card {
+    background-color: var(--bg-calendar);
+    border-radius: 1rem;
+    padding: 1.5rem;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    height: 100%;
+    border: none;
+    display: flex;
+    flex-direction: column;
+}
+
+.calendar-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.5rem;
+    flex-shrink: 0;
+}
+
+.calendar-header h3 {
+    color: var(--text-primary);
+    margin: 0;
+    font-size: 1.2rem;
+}
+
+.calendar-nav {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.nav-btn {
+    background: none;
+    border: 1px solid var(--bg-sidebar);
+    color: var(--text-primary);
+    width: 30px;
+    height: 30px;
+    border-radius: 6px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1rem;
+    transition: all 0.2s ease;
+    padding: 0;
+}
+
+.nav-btn:hover {
+    background-color: var(--accent);
+    color: var(--text-inverse);
+}
+
+.calendar-weekdays {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    text-align: center;
+    margin-bottom: 0.5rem;
+    flex-shrink: 0;
+}
+
+.calendar-weekdays span {
+    color: var(--text-primary);
+    font-size: 0.85rem;
+    font-weight: bold;
+    opacity: 0.7;
+    padding: 0.5rem;
+}
+
+.calendar-days {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 4px;
+    flex: 1;
+    min-height: 0;
+}
+
+.calendar-days .day-cell {
+    aspect-ratio: auto;
+    height: 6vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    color: var(--text-primary);
+    font-size: clamp(0.8rem, 2  vh, 1rem);
+    cursor: pointer;
+    border-radius: 12px;
+    transition: all 0.2s ease;
+    width: 100%;
+    padding: 0;
+    position: relative;
+    background-color: transparent;
+    border: 1px solid transparent;
+}
+
+.calendar-days .day-cell:hover {
+    background-color: var(--accent);
+    color: var(--text-primary);
+    transform: scale(0.95);
+}
+
+.calendar-days .day-cell.other-month {
+    opacity: 0.3;
+}
+
+.calendar-days .day-cell.today {
+    background-color: var(--accent);
+    color: var(--text-primary);
+    font-weight: bold;
+    border: 1px solid var(--text-inverse);
+}
+
+.day-number {
+    font-weight: 500;
+}
+
+.event-indicator {
+    display: flex;
+    gap: 3px;
+    margin-top: 2px;
+    justify-content: center;
+}
+
+.badge-event {
+    width: 5px;
+    height: 5px;
+    border-radius: 50%;
+}
+
+.badge-overdue {
+    background-color: #e36c4a;
+}
+
+/* Notification Card */
+.notification-card {
+    background-color: var(--bg-sidebar);
+    border-radius: 1rem;
+    padding: 1.5rem;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    height: 100%;
+    border: none;
+    display: flex;
+    flex-direction: column;
+    opacity: 90%;
+}
+
+.notification-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.5rem;
+    flex-shrink: 0;
+}
+
+.notification-header h3 {
+    color: var(--text-inverse);
+    margin: 0;
+    font-size: 1.2rem;
+}
+
+.notification-badge {
+    background-color: var(--accent);
+    color: var(--text-primary);
+    padding: 0.25rem 0.75rem;
+    border-radius: 1rem;
+    font-size: 0.85rem;
+    font-weight: bold;
+}
+
+.notification-empty {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    flex: 1;
+    min-height: 0;
+    text-align: center;
+}
+
+.empty-icon {
+    font-size: clamp(2rem, 5vh, 3rem);
+    margin-bottom: 1rem;
+    opacity: 0.5;
+}
+
+.notification-empty p {
+    color: var(--text-inverse);
+    margin: 0 0 0.5rem 0;
+    font-size: clamp(0.9rem, 2vh, 1.1rem);
+}
+
+.empty-subtext {
+    color: var(--text-inverse);
+    opacity: 0.5;
+    font-size: clamp(0.8rem, 1.8vh, 0.9rem);
+}
+
+/* Events List Styles */
+#eventsListContainer {
+    flex: 1;
+    overflow-y: auto;
+    max-height: 400px;
+}
+
+.event-item {
+    padding: 0.75rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    transition: background 0.2s;
+}
+
+.event-item:hover {
+    background-color: rgba(255, 255, 255, 0.05);
+}
+
+.event-title {
+    font-weight: bold;
+    color: var(--text-inverse);
+    margin-bottom: 0.25rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+}
+
+.event-badge {
+    font-size: 0.7rem;
+    padding: 0.2rem 0.5rem;
+    border-radius: 1rem;
+    font-weight: bold;
+}
+
+.event-badge.overdue {
+    background-color: #e36c4a;
+    color: white;
+}
+
+.event-badge.borrowed {
+    background-color: #3b82b6;
+    color: white;
+}
+
+.event-badge.reservation {
+    background-color: #f4b942;
+    color: #1e2a3e;
+}
+
+.event-detail {
+    font-size: 0.75rem;
+    color: var(--text-inverse);
+    opacity: 0.7;
+    display: flex;
+    gap: 1rem;
+    flex-wrap: wrap;
+    margin-top: 0.25rem;
+}
+
+.text-danger {
+    color: #ef4444;
+    font-size: 0.7rem;
+    margin-top: 0.25rem;
+}
+
+.btn-reserve {
+    background-color: var(--accent);
+    color: var(--text-primary);
+    border: none;
+    border-radius: 0.5rem;
+    padding: 0.5rem;
+    cursor: pointer;
+    font-weight: bold;
+    transition: all 0.2s ease;
+    width: 100%;
+}
+
+.btn-reserve:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+}
+
+/* Legend */
+.legend-info span {
+    font-size: 0.7rem;
+    color: var(--text-inverse);
+    opacity: 0.8;
+}
+
+/* Row height management */
+.row {
+    margin-right: 0;
+    margin-left: 0;
+}
+
+/* First row (cards) takes about 25% of viewport height */
+.row:first-of-type {
+    height: 25vh;
+    min-height: 180px;
+    margin-bottom: 2vh;
+}
+
+/* Second row (calendar + notifications) takes remaining space */
+.row:last-of-type {
+    height: calc(68vh - 40px);
+}
+
+/* Ensure columns fill the row height */
+.row:last-of-type > [class*="col-"] {
+    height: 100%;
+}
+
+/* Responsive adjustments for very small screens */
+@media (max-width: 768px) {
+    .dashboard-container {
+        padding: 1rem;
+        min-height: calc(100vh - 20px);
+    }
+    
+    .row:first-of-type {
+        height: auto;
+        min-height: auto;
+        margin-bottom: 1rem;
+    }
+    
+    .row:last-of-type {
+        height: auto;
+    }
+    
+    .row:last-of-type > [class*="col-"] {
+        height: auto;
+        margin-bottom: 1rem;
+    }
+    
+    .calendar-card {
+        min-height: 50vh;
+    }
+    
+    .notification-card {
+        min-height: 30vh;
+    }
+    
+    .card-value {
+        font-size: 1.5rem;
+    }
+    
+    .card-icon {
+        width: 50px;
+        height: 50px;
+        font-size: 2rem;
+    }
+    
+    .event-title {
+        font-size: 0.85rem;
+    }
+}
+
+/* Bootstrap overrides */
+.col-md-4, .col-md-8 {
+    padding-right: 12px;
+    padding-left: 12px;
+}
+
+/* Scrollbar styling */
+#eventsListContainer::-webkit-scrollbar {
+    width: 6px;
+}
+
+#eventsListContainer::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 3px;
+}
+
+#eventsListContainer::-webkit-scrollbar-thumb {
+    background: var(--accent);
+    border-radius: 3px;
 }
