@@ -13,7 +13,7 @@
     </div>
 
     <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addBookModal">Add Book</button>
-    <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#genreOverlayModal">Add Genre</button>
+    <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#genreOverlayModal" onclick="loadGenres()">Add Genre</button>
 
     <!-- Genre Overlay Modal -->
     <div class="modal fade" id="genreOverlayModal" tabindex="-1" aria-hidden="true">
@@ -231,16 +231,103 @@
 
 {% block extra_scripts %}
     <script>
-        // FOR THE BOOKS TABLE
-        let table = new DataTable('#booksTable', {
-            responsive: true,
-            paging: true,
-            searching: true,
-            ordering: true,
-            info: true,
-            scrollX: true
+        document.addEventListener("DOMContentLoaded", function () {
+            loadGenres();
         });
 
+        // FOR THE BOOKS TABLE
+        const container = document.getElementById('booksTable');
+
+        const data = [
+        {
+            book_id: 1,
+            accession_start: 1001,
+            accession_end: 1005,
+            isbn: "9781234567890",
+            title: "Sample Book",
+            author: "John Doe",
+            illustrator: "Jane Smith",
+            publisher: "Sample Publisher",
+            year: 2026,
+            category_id: 2,
+            total: 10,
+            available: 8,
+            shelf: "A1",
+            created: "2026-03-18",
+            updated: "2026-03-18",
+            grade: "KS 1 - Kinder to Grade 3",
+            pages: 120
+        }
+        ];
+
+        const hot = new Handsontable(container, {
+        data: data,
+
+        colHeaders: [
+            "Book ID",
+            "Accession Start",
+            "Accession End",
+            "ISBN",
+            "Title",
+            "Author",
+            "Illustrator",
+            "Publisher",
+            "Year",
+            "Category",
+            "Total",
+            "Available",
+            "Shelf",
+            "Created",
+            "Updated",
+            "Grade Level",
+            "Pages"
+        ],
+
+        columns: [
+            { data: 'book_id', readOnly: true },
+            { data: 'accession_start', type: 'numeric' },
+            { data: 'accession_end', type: 'numeric' },
+            { data: 'isbn' },
+            { data: 'title' },
+            { data: 'author' },
+            { data: 'illustrator' },
+            { data: 'publisher' },
+            { data: 'year', type: 'numeric' },
+            { data: 'category_id', type: 'numeric' },
+            { data: 'total', type: 'numeric' },
+            { data: 'available', type: 'numeric' },
+            { data: 'shelf' },
+            { data: 'created', type: 'date', dateFormat: 'YYYY-MM-DD' },
+            { data: 'updated', type: 'date', dateFormat: 'YYYY-MM-DD' },
+            { data: 'grade' },
+            { data: 'pages', type: 'numeric' }
+        ],
+
+        // 🔥 Excel-like features
+        rowHeaders: true,
+
+        // Editing
+        licenseKey: 'non-commercial-and-evaluation',
+        contextMenu: true, // right-click menu
+        manualColumnResize: true,
+        manualRowResize: true,
+
+        // Sorting + filtering
+        columnSorting: true,
+        filters: true,
+        dropdownMenu: true,
+
+        // Navigation
+        stretchH: 'all',
+        width: '100%',
+        height: 500,
+
+        // Auto new row
+        minSpareRows: 1
+        });
+
+
+        // FOR THE GENRE;
         const genreModal = document.getElementById('genreOverlayModal');
         const searchInput = document.getElementById('genreSearch');
         const addBtn = document.getElementById('addGenreBtn');
@@ -285,101 +372,30 @@
             selectedRow.scrollIntoView({ block: 'nearest' });
         }
 
-        // Add genre
-        function addGenre() {
-            const value = searchInput.value.trim();
-            if (!value) return;
+        
 
-            console.log('API CALL: ADD', value);
-
-            const row = document.createElement('tr');
-            row.innerHTML = `
-                <td>${value}</td>
-                <td>
-                    <button class="btn btn-sm btn-warning">Edit</button>
-                    <button class="btn btn-sm btn-danger">Delete</button>
-                </td>`;
-            tableBody.appendChild(row);
-
-            searchInput.value = '';
-            addBtn.disabled = true;
-
-            selectRow(tableBody.children.length - 1);
-            searchInput.focus();
+        function capitalizeWords(str) {
+            return str
+                .toLowerCase()
+                .trim()
+                .split(/\s+/)
+                .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+                .join(' ');
         }
 
-        // Edit selected
-        function editSelected() {
-            const rows = tableBody.querySelectorAll('tr');
-            if (selectedIndex < 0 || !rows[selectedIndex]) return;
-
-            const cell = rows[selectedIndex].children[0];
-            const current = cell.textContent;
-
-            const updated = prompt('Edit genre:', current);
-            if (updated && updated.trim() !== '') {
-                cell.textContent = updated.trim();
-                console.log('API CALL: EDIT', current, '→', updated);
-            }
+        function capitalizeWords(str) {
+            return str
+                .toLowerCase()
+                .split(' ')
+                .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+                .join(' ');
         }
 
-        // Delete selected
-        function deleteSelected() {
-            const rows = tableBody.querySelectorAll('tr');
-            if (selectedIndex < 0 || !rows[selectedIndex]) return;
+        
+        
 
-            const value = rows[selectedIndex].children[0].textContent;
-
-            if (confirm(`Delete "${value}"?`)) {
-                rows[selectedIndex].remove();
-                console.log('API CALL: DELETE', value);
-                selectRow(selectedIndex - 1);
-            }
-        }
-
-        addBtn.addEventListener('click', addGenre);
-
-        searchInput.addEventListener('keypress', e => {
-            if (e.key === 'Enter') {
-                e.preventDefault();
-                addGenre();
-            }
-        });
-
-        let keybinds = {
-            up: 'ArrowUp',
-            down: 'ArrowDown',
-            edit: '<',
-            delete: '>'
-        };
-
-        genreModal.addEventListener('keydown', e => {
-            const activeEl = document.activeElement;
-            const isTyping = activeEl.tagName === 'INPUT' || activeEl.tagName === 'TEXTAREA';
-
-            if (e.key === keybinds.up) {
-                e.preventDefault();
-                selectRow(selectedIndex - 1);
-                return;
-            }
-
-            if (e.key === keybinds.down) {
-                e.preventDefault();
-                selectRow(selectedIndex + 1);
-                return;
-            }
-
-            if (isTyping) return;
-
-            if (e.key === keybinds.edit) {
-                e.preventDefault();
-                editSelected();
-            }
-
-            if (e.key === keybinds.delete) {
-                e.preventDefault();
-                deleteSelected();
-            }
-        });
     </script>
+
+    <script src="{{ url_for('static', filename='js/genreCRUD.js') }}"></script>
+    
 {% endblock %}

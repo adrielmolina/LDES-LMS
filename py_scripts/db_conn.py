@@ -9,6 +9,7 @@ from datetime import date, datetime, timedelta, timezone
 from py_scripts import tools
 import py_scripts.models as models
 from random import randint
+import sqlite3
 
 if os.getenv('FLASK_ENV') == 'production' or os.getenv('FLASK_ENV') == 'development':
     DB_CONNECTION_MODE = os.getenv('DB_CONNECTION_MODE', 'aiven').lower()
@@ -34,8 +35,17 @@ SQL_DB = os.getenv('SQL_DB')
 # todo remove on deployment
 # print(f'SQL CONNECTION DEBUG\nHost={SQL_HOST}\nUser={SQL_USER}\nPass={SQL_PASS}\nDB={SQL_DB}')
 
-
+DB_PATH = Path("sql/LDES-LMS.db")
 def conn_init():
+    if not DB_PATH.exists():
+        raise FileNotFoundError("Database not found. Run init_db.py first.")
+
+    conn = sqlite3.connect(DB_PATH)
+    conn.row_factory = sqlite3.Row
+    conn.execute("PRAGMA foreign_keys = ON;")
+
+    return conn
+    '''
     try:
         if DB_CONNECTION_MODE == "aiven":
             ca_path = Path(__file__).resolve().parent.parent / "sql" / "aiven" / "ca.pem"
@@ -65,21 +75,21 @@ def conn_init():
     except Exception as e:
         print(f"Unexpected Error: {e}")
         return None
-    
+    '''
 
 # TODO replace all session binds with SessionLocal
 conn = conn_init()
 SessionLocal = scoped_session(sessionmaker(bind=conn))
 # db_session = SessionLocal() # Use this for queries
 
-
 def shutdown_session():
     """Remove session (for Flask teardown)"""
     SessionLocal.remove()
 
 
+
+
 if __name__ == '__main__':
     print('do no run this module directly lol')
     print('use initialize_database.py')
-    
     
