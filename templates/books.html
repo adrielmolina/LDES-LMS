@@ -1,14 +1,10 @@
 {% extends 'base.html' %}
 
-
 {% block title %}Books Management{% endblock %}
-
 
 {% block head %}
     <link rel="stylesheet" href="{{ url_for('static', filename='styles/books.css') }}">
-
 {% endblock %}
-
 
 {% block content %}
 <div class="module-container">
@@ -16,51 +12,156 @@
         <h1 class="title">Book Management</h1>
     </div>
 
-    <button type="button" class="btn btn-primary">Add Book</button>
+    <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addBookModal">Add Book</button>
     <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#genreOverlayModal">Add Genre</button>
 
-    <!-- Overlay Modal -->
+    <!-- Genre Overlay Modal -->
     <div class="modal fade" id="genreOverlayModal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered modal-lg">
-        <div class="modal-content p-3">
-        <!-- Search bar -->
-        <div class="mb-3">
-            <input type="text" id="genreSearch" class="form-control" placeholder="Search or add genre...">
-        </div>
+        <div class="modal-dialog modal-dialog-centered modal-lg">
+            <div class="modal-content p-3">
+                <!-- Search bar -->
+                <div class="mb-3">
+                    <input type="text" id="genreSearch" class="form-control" placeholder="Search or add genre...">
+                </div>
 
-        <!-- Genre Table -->
-        <table class="table" id="genreTable">
-            <thead>
-            <tr>
-                <th>Genre</th>
-                <th>Actions</th>
-            </tr>
-            </thead>
-            <tbody>
-            <tr>
-                <td>Fantasy</td>
-                <td>
-                <button class="btn btn-sm btn-warning">Edit</button>
-                <button class="btn btn-sm btn-danger">Delete</button>
-                </td>
-            </tr>
-            <tr>
-                <td>Science Fiction</td>
-                <td>
-                <button class="btn btn-sm btn-warning">Edit</button>
-                <button class="btn btn-sm btn-danger">Delete</button>
-                </td>
-            </tr>
-            </tbody>
-        </table>
+                <!-- Genre Table -->
+                <table class="table" id="genreTable">
+                    <thead>
+                        <tr>
+                            <th>Genre</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Fantasy</td>
+                            <td>
+                                <button class="btn btn-sm btn-warning">Edit</button>
+                                <button class="btn btn-sm btn-danger">Delete</button>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>Science Fiction</td>
+                            <td>
+                                <button class="btn btn-sm btn-warning">Edit</button>
+                                <button class="btn btn-sm btn-danger">Delete</button>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
 
-        <!-- Add button (dynamic) -->
-        <div class="text-end">
-            <button class="btn btn-success" id="addGenreBtn" disabled>Add Genre</button>
-        </div>
+                <!-- Add button (dynamic) -->
+                <div class="text-end">
+                    <button class="btn btn-success" id="addGenreBtn" disabled>Add Genre</button>
+                </div>
+            </div>
         </div>
     </div>
+
+    <!-- Add Book Modal -->
+<div class="modal fade" id="addBookModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-xl">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Add New Book</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="addBookForm">
+                    <!-- Row 1 -->
+                    <div class="row mb-3">
+                        <div class="col-md-3">
+                            <label for="accessionStart" class="form-label">Accession Start</label>
+                            <input type="text" class="form-control" id="accessionStart" placeholder="Enter Accession Start">
+                        </div>
+                        <div class="col-md-3">
+                            <label for="accessionEnd" class="form-label">Accession End</label>
+                            <input type="text" class="form-control" id="accessionEnd" placeholder="Enter Accession End">
+                        </div>
+                        <div class="col-md-3">
+                            <label for="isbn" class="form-label">ISBN</label>
+                            <input type="text" class="form-control" id="isbn" placeholder="Enter ISBN">
+                        </div>
+                        <div class="col-md-3">
+                            <label for="title" class="form-label">Title</label>
+                            <input type="text" class="form-control" id="title" placeholder="Enter Book Title">
+                        </div>
+                    </div>
+
+                    <!-- Row 2 -->
+                    <div class="row mb-3">
+                        <div class="col-md-3">
+                            <label for="author" class="form-label">Author</label>
+                            <input type="text" class="form-control" id="author" placeholder="Enter Author">
+                        </div>
+                        <div class="col-md-3">
+                            <label for="illustrator" class="form-label">Illustrator</label>
+                            <input type="text" class="form-control" id="illustrator" placeholder="Enter Illustrator">
+                        </div>
+                        <div class="col-md-3">
+                            <label for="publisher" class="form-label">Publisher</label>
+                            <input type="text" class="form-control" id="publisher" placeholder="Enter Publisher">
+                        </div>
+                        <div class="col-md-3">
+                            <label for="publicationYear" class="form-label">Publication Year</label>
+                            <input type="text" class="form-control" id="publicationYear" placeholder="Enter Publication Year">
+                        </div>
+                    </div>
+
+                    <!-- Row 3 -->
+                    <div class="row mb-3">
+                        <div class="col-md-3">
+                            <label for="categoryId" class="form-label">Category ID</label>
+                            <input type="text" class="form-control" id="categoryId" placeholder="Enter Category ID">
+                        </div>
+                        <div class="col-md-3">
+                            <label for="totalCopies" class="form-label">Total Copies</label>
+                            <input type="number" class="form-control" id="totalCopies" placeholder="Total Copies">
+                        </div>
+                        <div class="col-md-3">
+                            <label for="availableCopies" class="form-label">Available Copies</label>
+                            <input type="number" class="form-control" id="availableCopies" placeholder="Available Copies">
+                        </div>
+                        <div class="col-md-3">
+                            <label for="shelfLocation" class="form-label">Shelf Location</label>
+                            <input type="text" class="form-control" id="shelfLocation" placeholder="Enter Shelf Location">
+                        </div>
+                    </div>
+
+                    <!-- Row 4 -->
+                    <div class="row">
+                        <div class="col-md-3">
+                            <label for="keyStage" class="form-label">Key Stage Grade Level</label>
+                            <select class="form-select" id="keyStage">
+                                <option value="">Select Key Stage</option>
+                                <option value="KS 1 - Kinder to Grade 3">KS 1 - Kinder to Grade 3</option>
+                                <option value="KS 2 - Grade 4 to Grade 6">KS 2 - Grade 4 to Grade 6</option>
+                                <option value="KS 3 - Grade 7 to Grade 10">KS 3 - Grade 7 to Grade 10</option>
+                                <option value="KS 4 - Grade 11 to Grade 12">KS 4 - Grade 11 to Grade 12</option>
+                            </select>
+                        </div>
+                        <div class="col-md-3">
+                            <label for="noOfPages" class="form-label">No. of Pages</label>
+                            <input type="number" class="form-control" id="noOfPages" placeholder="Enter number of pages">
+                        </div>
+                        <div class="col-md-3">
+                            <label for="createdAt" class="form-label">Created At</label>
+                            <input type="date" class="form-control" id="createdAt">
+                        </div>
+                        <div class="col-md-3">
+                            <label for="lastUpdated" class="form-label">Last Updated At</label>
+                            <input type="date" class="form-control" id="lastUpdated">
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary" id="saveBookBtn">Save Book</button>
+            </div>
+        </div>
     </div>
+</div>
 
     <table id="booksTable" class="table table-striped">
         <thead>
@@ -125,16 +226,8 @@
             </tr>
         </tbody>
     </table>
-
-
-    
-
-
-
-
 </div>
 {% endblock %}
-
 
 {% block extra_scripts %}
     <script>
@@ -148,9 +241,6 @@
             scrollX: true
         });
 
-        // FOR THE GENRE);
-
-
         const genreModal = document.getElementById('genreOverlayModal');
         const searchInput = document.getElementById('genreSearch');
         const addBtn = document.getElementById('addGenreBtn');
@@ -162,7 +252,6 @@
         genreModal.addEventListener('shown.bs.modal', () => {
             searchInput.focus();
 
-            // ✅ force selection AFTER modal fully renders
             setTimeout(() => {
                 selectRow(0);
             }, 50);
@@ -170,10 +259,10 @@
 
         // Enable Add button if search input has text
         searchInput.addEventListener('input', () => {
-        addBtn.disabled = searchInput.value.trim() === '';
+            addBtn.disabled = searchInput.value.trim() === '';
         });
 
-        // 🔹 Select row helper
+        // Select row helper
         function selectRow(index) {
             const rows = tableBody.querySelectorAll('tr');
 
@@ -182,11 +271,9 @@
                 return;
             }
 
-            // clamp index
             if (index < 0) index = 0;
             if (index >= rows.length) index = rows.length - 1;
 
-            // remove previous selection
             rows.forEach(row => row.classList.remove('selected'));
 
             selectedIndex = index;
@@ -195,80 +282,69 @@
             if (!selectedRow) return;
 
             selectedRow.classList.add('selected');
-
-            // scroll into view
             selectedRow.scrollIntoView({ block: 'nearest' });
         }
 
-        // 🔹 Add genre
+        // Add genre
         function addGenre() {
-        const value = searchInput.value.trim();
-        if (!value) return;
+            const value = searchInput.value.trim();
+            if (!value) return;
 
-        // API placeholder
-        console.log('API CALL: ADD', value);
+            console.log('API CALL: ADD', value);
 
-        const row = document.createElement('tr');
-        row.innerHTML = `
-            <td>${value}</td>
-            <td>
-            <button class="btn btn-sm btn-warning">Edit</button>
-            <button class="btn btn-sm btn-danger">Delete</button>
-            </td>`;
-        tableBody.appendChild(row);
+            const row = document.createElement('tr');
+            row.innerHTML = `
+                <td>${value}</td>
+                <td>
+                    <button class="btn btn-sm btn-warning">Edit</button>
+                    <button class="btn btn-sm btn-danger">Delete</button>
+                </td>`;
+            tableBody.appendChild(row);
 
-        searchInput.value = '';
-        addBtn.disabled = true;
+            searchInput.value = '';
+            addBtn.disabled = true;
 
-        selectRow(tableBody.children.length - 1);
-        searchInput.focus();
+            selectRow(tableBody.children.length - 1);
+            searchInput.focus();
         }
 
-        // 🔹 Edit selected
+        // Edit selected
         function editSelected() {
-        const rows = tableBody.querySelectorAll('tr');
-        if (selectedIndex < 0 || !rows[selectedIndex]) return;
+            const rows = tableBody.querySelectorAll('tr');
+            if (selectedIndex < 0 || !rows[selectedIndex]) return;
 
-        const cell = rows[selectedIndex].children[0];
-        const current = cell.textContent;
+            const cell = rows[selectedIndex].children[0];
+            const current = cell.textContent;
 
-        const updated = prompt('Edit genre:', current);
-        if (updated && updated.trim() !== '') {
-            cell.textContent = updated.trim();
-
-            // API placeholder
-            console.log('API CALL: EDIT', current, '→', updated);
-        }
+            const updated = prompt('Edit genre:', current);
+            if (updated && updated.trim() !== '') {
+                cell.textContent = updated.trim();
+                console.log('API CALL: EDIT', current, '→', updated);
+            }
         }
 
-        // 🔹 Delete selected
+        // Delete selected
         function deleteSelected() {
-        const rows = tableBody.querySelectorAll('tr');
-        if (selectedIndex < 0 || !rows[selectedIndex]) return;
+            const rows = tableBody.querySelectorAll('tr');
+            if (selectedIndex < 0 || !rows[selectedIndex]) return;
 
-        const value = rows[selectedIndex].children[0].textContent;
+            const value = rows[selectedIndex].children[0].textContent;
 
-        if (confirm(`Delete "${value}"?`)) {
-            rows[selectedIndex].remove();
-
-            // API placeholder
-            console.log('API CALL: DELETE', value);
-
-            selectRow(selectedIndex - 1);
-        }
+            if (confirm(`Delete "${value}"?`)) {
+                rows[selectedIndex].remove();
+                console.log('API CALL: DELETE', value);
+                selectRow(selectedIndex - 1);
+            }
         }
 
-        // 🔹 Button click
         addBtn.addEventListener('click', addGenre);
 
-        // 🔹 Enter key = Add
         searchInput.addEventListener('keypress', e => {
-        if (e.key === 'Enter') {
-            e.preventDefault();
-            addGenre();
-        }
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                addGenre();
+            }
         });
-
 
         let keybinds = {
             up: 'ArrowUp',
@@ -277,43 +353,33 @@
             delete: '>'
         };
 
-        const genreModal1 = document.getElementById('genreOverlayModal');
+        genreModal.addEventListener('keydown', e => {
+            const activeEl = document.activeElement;
+            const isTyping = activeEl.tagName === 'INPUT' || activeEl.tagName === 'TEXTAREA';
 
-        genreModal1.addEventListener('keydown', e => {
-        const activeEl = document.activeElement;
-        const isTyping = activeEl.tagName === 'INPUT' || activeEl.tagName === 'TEXTAREA';
+            if (e.key === keybinds.up) {
+                e.preventDefault();
+                selectRow(selectedIndex - 1);
+                return;
+            }
 
-        // ✅ ALWAYS handle UP/DOWN (even inside input)
-        if (e.key === keybinds.up) {
-            e.preventDefault();
-            selectRow(selectedIndex - 1);
-            return;
-        }
+            if (e.key === keybinds.down) {
+                e.preventDefault();
+                selectRow(selectedIndex + 1);
+                return;
+            }
 
-        if (e.key === keybinds.down) {
-            e.preventDefault();
-            selectRow(selectedIndex + 1);
-            return;
-        }
+            if (isTyping) return;
 
-        // ⛔ block other shortcuts while typing
-        if (isTyping) return;
+            if (e.key === keybinds.edit) {
+                e.preventDefault();
+                editSelected();
+            }
 
-        // ✅ EDIT
-        if (e.key === keybinds.edit) {
-            e.preventDefault();
-            editSelected();
-        }
-
-        // ✅ DELETE
-        if (e.key === keybinds.delete) {
-            e.preventDefault();
-            deleteSelected();
-        }
+            if (e.key === keybinds.delete) {
+                e.preventDefault();
+                deleteSelected();
+            }
         });
-
-
-
     </script>
-    
 {% endblock %}
