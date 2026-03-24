@@ -5,7 +5,7 @@ body {
 #booksTable th, 
 #booksTable td {
     text-align: center;
-    vertical-align: middle; /* optional: vertically center text */
+    vertical-align: middle;
 }
 
 #genreTable td:last-child,
@@ -15,5 +15,125 @@ body {
 }
 
 #genreTable tbody tr.selected {
-    background-color: #7b91ad; /* light blue highlight */
+    background-color: #7b91ad;
+}
+
+/* Add Book Modal Styling */
+.modal-content {
+    background-color: var(--bg-form);
+    color: var(--text-primary);
+    border: none;
+    border-radius: 12px;
+}
+
+.modal-header {
+    border-bottom: 1px solid var(--bg-hover);
+    padding: 1rem 1.5rem;
+}
+
+.modal-title {
+    color: var(--text-primary);
+    font-weight: 600;
+}
+
+.btn-close {
+    filter: invert(0.3);
+}
+
+.dark-mode .btn-close {
+    filter: invert(1);
+}
+
+.modal-body {
+    padding: 1.5rem;
+}
+
+.modal-footer {
+    border-top: 1px solid var(--bg-hover);
+    padding: 1rem 1.5rem;
+}
+
+/* Form Labels */
+.form-label {
+    color: var(--text-primary);
+    font-weight: 500;
+    margin-bottom: 0.5rem;
+    font-size: 0.9rem;
+}
+
+/* Form Inputs */
+.form-control, .form-select {
+    background-color: var(--bg-form);
+    border: 1px solid var(--bg-hover);
+    color: var(--text-primary);
+    border-radius: 6px;
+    padding: 0.5rem 0.75rem;
+    transition: all 0.2s;
+}
+
+.form-control:focus, .form-select:focus {
+    background-color: var(--bg-form);
+    border-color: var(--accent);
+    color: var(--text-primary);
+    box-shadow: 0 0 0 0.2rem rgba(170, 159, 149, 0.25);
+    outline: none;
+}
+
+.dark-mode .form-control:focus, 
+.dark-mode .form-select:focus {
+    box-shadow: 0 0 0 0.2rem rgba(32, 178, 170, 0.25);
+}
+
+.form-control::placeholder {
+    color: #999;
+    opacity: 0.7;
+}
+
+.dark-mode .form-control::placeholder {
+    color: #6c8b8b;
+}
+
+/* Buttons */
+.btn-primary {
+    background-color: var(--accent);
+    border-color: var(--accent);
+    color: var(--text-inverse);
+    padding: 0.5rem 1.5rem;
+    border-radius: 6px;
+    transition: all 0.2s;
+}
+
+.btn-primary:hover {
+    background-color: var(--bg-hover);
+    border-color: var(--bg-hover);
+    transform: translateY(-1px);
+}
+
+.btn-secondary {
+    background-color: transparent;
+    border: 1px solid var(--bg-hover);
+    color: var(--text-primary);
+    padding: 0.5rem 1.5rem;
+    border-radius: 6px;
+}
+
+.btn-secondary:hover {
+    background-color: var(--bg-hover);
+    border-color: var(--bg-hover);
+    color: var(--text-inverse);
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .modal-dialog {
+        margin: 0.5rem;
+    }
+    
+    .modal-body {
+        padding: 1rem;
+    }
+    
+    .modal-header, .modal-footer {
+        padding: 0.75rem 1rem;
+    }
 }
