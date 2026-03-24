@@ -75,10 +75,19 @@ def settings():
     return render_template('settings.html')
 
 
-
-
-
 #? -------------------- END -------------------- ?#
+
+@server.route("/api/categories")
+def get_categories():
+    conn = db_conn.conn_init()
+    cursor = conn.cursor()
+
+    cursor.execute("SELECT category_id, name FROM categories")
+    rows = cursor.fetchall()
+
+    data = [dict(row) for row in rows]
+
+    return {"data": data}
 
 #? -------------------- MISC ROUTES -------------------- ?#
 

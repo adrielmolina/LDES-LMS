@@ -12,7 +12,7 @@
 
 {% block content %}
     <button type="button" class="btn btn-primary">Add Book</button>
-    <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#genreOverlayModal">Add Genre</button>
+    <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#genreOverlayModal" onclick="loadGenres()">Add Genre</button>
 
     <!-- Overlay Modal -->
     <div class="modal fade" id="genreOverlayModal" tabindex="-1" aria-hidden="true">
@@ -32,7 +32,8 @@
             </tr>
             </thead>
             <tbody>
-            <tr>
+                <!-- TODO remove later -->
+            <!-- <tr>
                 <td>Fantasy</td>
                 <td>
                 <button class="btn btn-sm btn-warning">Edit</button>
@@ -45,7 +46,7 @@
                 <button class="btn btn-sm btn-warning">Edit</button>
                 <button class="btn btn-sm btn-danger">Delete</button>
                 </td>
-            </tr>
+            </tr> -->
             </tbody>
         </table>
 
@@ -57,69 +58,8 @@
     </div>
     </div>
 
-    <table id="booksTable" class="table table-striped">
-        <thead>
-            <tr>
-                <th>Book ID</th>
-                <th>Accession Start</th>
-                <th>Accession End</th>
-                <th>ISBN</th>
-                <th>Title</th>
-                <th>Author</th>
-                <th>Illustrator</th>
-                <th>Publisher</th>
-                <th>Publication Year</th>
-                <th>Category ID</th>
-                <th>Total Copies</th>
-                <th>Available Copies</th>
-                <th>Shelf Location</th>
-                <th>Created At</th>
-                <th>Last Updated At</th>
-                <th>Key Stage Grade Level</th>
-                <th>No. of Pages</th>
-            </tr>
-        </thead>
-        <tbody>
-            <tr>
-                <td>1</td>
-                <td>1001</td>
-                <td>1005</td>
-                <td>9781234567890</td>
-                <td>Sample Book</td>
-                <td>John Doe</td>
-                <td>Jane Smith</td>
-                <td>Sample Publisher</td>
-                <td>2026</td>
-                <td>2</td>
-                <td>10</td>
-                <td>8</td>
-                <td>Shelf A1</td>
-                <td>2026-03-18</td>
-                <td>2026-03-18</td>
-                <td>KS 1 - Kinder to Grade 3</td>
-                <td>120</td>
-            </tr>
-            <tr>
-                <td>2</td>
-                <td>1001</td>
-                <td>1005</td>
-                <td>9781234567890</td>
-                <td>Sample Book</td>
-                <td>John Doe</td>
-                <td>Jane Smith</td>
-                <td>Sample Publisher</td>
-                <td>2026</td>
-                <td>2</td>
-                <td>10</td>
-                <td>8</td>
-                <td>Shelf A1</td>
-                <td>2026-03-18</td>
-                <td>2026-03-18</td>
-                <td>KS 1 - Kinder to Grade 3</td>
-                <td>120</td>
-            </tr>
-        </tbody>
-    </table>
+
+    <div id="booksTable"></div>
 
 
     
@@ -133,18 +73,137 @@
 
 {% block extra_scripts %}
     <script>
-        // FOR THE BOOKS TABLE
-        let table = new DataTable('#booksTable', {
-            responsive: true,
-            paging: true,
-            searching: true,
-            ordering: true,
-            info: true,
-            scrollX: true
+        document.addEventListener("DOMContentLoaded", function () {
+            loadGenres();
         });
 
-        // FOR THE GENRE);
+        // FOR THE BOOKS TABLE
+        const container = document.getElementById('booksTable');
 
+        const data = [
+        {
+            book_id: 1,
+            accession_start: 1001,
+            accession_end: 1005,
+            isbn: "9781234567890",
+            title: "Sample Book",
+            author: "John Doe",
+            illustrator: "Jane Smith",
+            publisher: "Sample Publisher",
+            year: 2026,
+            category_id: 2,
+            total: 10,
+            available: 8,
+            shelf: "A1",
+            created: "2026-03-18",
+            updated: "2026-03-18",
+            grade: "KS 1 - Kinder to Grade 3",
+            pages: 120
+        }
+        ];
+
+        const hot = new Handsontable(container, {
+        data: data,
+
+        colHeaders: [
+            "Book ID",
+            "Accession Start",
+            "Accession End",
+            "ISBN",
+            "Title",
+            "Author",
+            "Illustrator",
+            "Publisher",
+            "Year",
+            "Category",
+            "Total",
+            "Available",
+            "Shelf",
+            "Created",
+            "Updated",
+            "Grade Level",
+            "Pages"
+        ],
+
+        columns: [
+            { data: 'book_id', readOnly: true },
+            { data: 'accession_start', type: 'numeric' },
+            { data: 'accession_end', type: 'numeric' },
+            { data: 'isbn' },
+            { data: 'title' },
+            { data: 'author' },
+            { data: 'illustrator' },
+            { data: 'publisher' },
+            { data: 'year', type: 'numeric' },
+            { data: 'category_id', type: 'numeric' },
+            { data: 'total', type: 'numeric' },
+            { data: 'available', type: 'numeric' },
+            { data: 'shelf' },
+            { data: 'created', type: 'date', dateFormat: 'YYYY-MM-DD' },
+            { data: 'updated', type: 'date', dateFormat: 'YYYY-MM-DD' },
+            { data: 'grade' },
+            { data: 'pages', type: 'numeric' }
+        ],
+
+        // 🔥 Excel-like features
+        rowHeaders: true,
+
+        // Editing
+        licenseKey: 'non-commercial-and-evaluation',
+        contextMenu: true, // right-click menu
+        manualColumnResize: true,
+        manualRowResize: true,
+
+        // Sorting + filtering
+        columnSorting: true,
+        filters: true,
+        dropdownMenu: true,
+
+        // Navigation
+        stretchH: 'all',
+        width: '100%',
+        height: 500,
+
+        // Auto new row
+        minSpareRows: 1
+        });
+
+        async function loadGenres() {
+            const tbody = document.querySelector('#genreTable tbody');
+
+            // 👇 show loading state immediately
+            tbody.innerHTML = "<tr><td colspan='2'>Loading...</td></tr>";
+
+            try {
+                const res = await fetch('/api/categories');
+                const result = await res.json();
+
+                // 👇 clear loading
+                tbody.innerHTML = "";
+
+                result.data.forEach(genre => {
+                    const row = document.createElement('tr');
+
+                    row.innerHTML = `
+                        <td>${genre.name}</td>
+                        <td>
+                            <button class="btn btn-sm btn-warning" onclick="editGenre(${genre.category_id})">Edit</button>
+                            <button class="btn btn-sm btn-danger" onclick="deleteGenre(${genre.category_id})">Delete</button>
+                        </td>
+                    `;
+
+                    tbody.appendChild(row);
+                });
+
+            } catch (err) {
+                console.error(err);
+
+                // 👇 show error state
+                tbody.innerHTML = "<tr><td colspan='2'>Failed to load</td></tr>";
+            }
+        }
+
+        // FOR THE GENRE);
 
         const genreModal = document.getElementById('genreOverlayModal');
         const searchInput = document.getElementById('genreSearch');
