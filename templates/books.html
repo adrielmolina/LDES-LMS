@@ -173,43 +173,8 @@
         minSpareRows: 1
         });
 
-        async function loadGenres() {
-            const tbody = document.querySelector('#genreTable tbody');
 
-            // 👇 show loading state immediately
-            tbody.innerHTML = "<tr><td colspan='2'>Loading...</td></tr>";
-
-            try {
-                const res = await fetch('/api/categories');
-                const result = await res.json();
-
-                // 👇 clear loading
-                tbody.innerHTML = "";
-
-                result.data.forEach(genre => {
-                    const row = document.createElement('tr');
-
-                    row.innerHTML = `
-                        <td>${genre.name}</td>
-                        <td>
-                            <button class="btn btn-sm btn-warning" onclick="editGenre(${genre.category_id})">Edit</button>
-                            <button class="btn btn-sm btn-danger" onclick="deleteGenre(${genre.category_id})">Delete</button>
-                        </td>
-                    `;
-
-                    tbody.appendChild(row);
-                });
-
-            } catch (err) {
-                console.error(err);
-
-                // 👇 show error state
-                tbody.innerHTML = "<tr><td colspan='2'>Failed to load</td></tr>";
-            }
-        }
-
-        // FOR THE GENRE);
-
+        // FOR THE GENRE;
         const genreModal = document.getElementById('genreOverlayModal');
         const searchInput = document.getElementById('genreSearch');
         const addBtn = document.getElementById('addGenreBtn');
@@ -259,120 +224,30 @@
             selectedRow.scrollIntoView({ block: 'nearest' });
         }
 
-        // 🔹 Add genre
-        function addGenre() {
-        const value = searchInput.value.trim();
-        if (!value) return;
+        
 
-        // API placeholder
-        console.log('API CALL: ADD', value);
-
-        const row = document.createElement('tr');
-        row.innerHTML = `
-            <td>${value}</td>
-            <td>
-            <button class="btn btn-sm btn-warning">Edit</button>
-            <button class="btn btn-sm btn-danger">Delete</button>
-            </td>`;
-        tableBody.appendChild(row);
-
-        searchInput.value = '';
-        addBtn.disabled = true;
-
-        selectRow(tableBody.children.length - 1);
-        searchInput.focus();
+        function capitalizeWords(str) {
+            return str
+                .toLowerCase()
+                .trim()
+                .split(/\s+/)
+                .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+                .join(' ');
         }
 
-        // 🔹 Edit selected
-        function editSelected() {
-        const rows = tableBody.querySelectorAll('tr');
-        if (selectedIndex < 0 || !rows[selectedIndex]) return;
-
-        const cell = rows[selectedIndex].children[0];
-        const current = cell.textContent;
-
-        const updated = prompt('Edit genre:', current);
-        if (updated && updated.trim() !== '') {
-            cell.textContent = updated.trim();
-
-            // API placeholder
-            console.log('API CALL: EDIT', current, '→', updated);
-        }
+        function capitalizeWords(str) {
+            return str
+                .toLowerCase()
+                .split(' ')
+                .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+                .join(' ');
         }
 
-        // 🔹 Delete selected
-        function deleteSelected() {
-        const rows = tableBody.querySelectorAll('tr');
-        if (selectedIndex < 0 || !rows[selectedIndex]) return;
-
-        const value = rows[selectedIndex].children[0].textContent;
-
-        if (confirm(`Delete "${value}"?`)) {
-            rows[selectedIndex].remove();
-
-            // API placeholder
-            console.log('API CALL: DELETE', value);
-
-            selectRow(selectedIndex - 1);
-        }
-        }
-
-        // 🔹 Button click
-        addBtn.addEventListener('click', addGenre);
-
-        // 🔹 Enter key = Add
-        searchInput.addEventListener('keypress', e => {
-        if (e.key === 'Enter') {
-            e.preventDefault();
-            addGenre();
-        }
-        });
-
-
-        let keybinds = {
-            up: 'ArrowUp',
-            down: 'ArrowDown',
-            edit: '<',
-            delete: '>'
-        };
-
-        const genreModal1 = document.getElementById('genreOverlayModal');
-
-        genreModal1.addEventListener('keydown', e => {
-        const activeEl = document.activeElement;
-        const isTyping = activeEl.tagName === 'INPUT' || activeEl.tagName === 'TEXTAREA';
-
-        // ✅ ALWAYS handle UP/DOWN (even inside input)
-        if (e.key === keybinds.up) {
-            e.preventDefault();
-            selectRow(selectedIndex - 1);
-            return;
-        }
-
-        if (e.key === keybinds.down) {
-            e.preventDefault();
-            selectRow(selectedIndex + 1);
-            return;
-        }
-
-        // ⛔ block other shortcuts while typing
-        if (isTyping) return;
-
-        // ✅ EDIT
-        if (e.key === keybinds.edit) {
-            e.preventDefault();
-            editSelected();
-        }
-
-        // ✅ DELETE
-        if (e.key === keybinds.delete) {
-            e.preventDefault();
-            deleteSelected();
-        }
-        });
-
-
+        
+        
 
     </script>
+
+    <script src="{{ url_for('static', filename='js/genreCRUD.js') }}"></script>
     
 {% endblock %}

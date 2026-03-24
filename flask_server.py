@@ -12,6 +12,7 @@ from functools import wraps
 from io import BytesIO
 from flask import send_file
 import requests
+import re
 
 
 server = Flask(__name__)
@@ -77,7 +78,7 @@ def settings():
 
 #? -------------------- END -------------------- ?#
 
-@server.route("/api/categories")
+@server.route("/api/categories", methods=["GET"])
 def get_categories():
     conn = db_conn.conn_init()
     cursor = conn.cursor()
@@ -88,6 +89,82 @@ def get_categories():
     data = [dict(row) for row in rows]
 
     return {"data": data}
+
+
+@server.route("/api/categories", methods=["POST"])
+def add_category():
+
+    data = request.get_json()
+    name = data.get("name")
+
+    if not name:
+        return jsonify({"error": "Name is required"}), 400
+    
+    # 👇 normalize spaces
+    name = re.sub(r"\s+", " ", name.strip())
+    
+    conn = db_conn.conn_init()
+    cursor = conn.cursor()
+
+    try:
+        cursor.execute("INSERT INTO categories (name) VALUES (?)", (name,))
+        conn.commit()
+
+        return jsonify({"success": True})
+
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+    
+    
+@server.route("/api/categories/<int:id>", methods=["PUT"])
+def update_category(id):
+    data = request.get_json()
+
+    if not data:
+        return jsonify({"error": "Invalid request"}), 400
+
+    name = data.get("name")
+
+    if not name:
+        return jsonify({"error": "Name is required"}), 400
+
+    # 👇 normalize (VERY IMPORTANT)
+    name = re.sub(r"\s+", " ", name.strip()).title()
+
+    conn = db_conn.conn_init()
+    cursor = conn.cursor()
+
+    try:
+        cursor.execute(
+            "UPDATE categories SET name = ? WHERE category_id = ?",
+            (name, id)
+        )
+        conn.commit()
+
+        return jsonify({"success": True})
+
+    except Exception as e:
+        print("DB ERROR:", e)
+        return jsonify({"error": str(e)}), 500
+    
+    
+@server.route("/api/categories/<int:id>", methods=["DELETE"])
+def delete_category(id):
+
+    conn = db_conn.conn_init()
+    cursor = conn.cursor()
+
+    try:
+        cursor.execute("DELETE FROM categories WHERE category_id = ?", (id,))
+        conn.commit()
+
+        return jsonify({"success": True})
+
+    except Exception as e:
+        print("DB ERROR:", e)
+        return jsonify({"error": str(e)}), 500    
+    
+
 
 #? -------------------- MISC ROUTES -------------------- ?#
 
