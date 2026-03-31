@@ -2,35 +2,51 @@
    🌞 Default Theme (Light)
    ========================= */
 :root {
-  --bg-body: #f8f2eb;
-  --bg-sidebar: #34000b;
-  --bg-hover: #aa9f95;
-  --bg-calendar:#e6d3c3 ;
-  --bg-form:#fffdf8 ;
+  --bg-body: #f4f5f7;
+  --bg-sidebar: #2b1e1a;
+  --bg-hover: #e8e1da;
+  --bg-calendar: #efe7de;
+  --bg-form: #ffffff;
 
-  --text-primary: #3e2c23;
+  --text-primary: #2a1f1b;
   --text-inverse: #ffffff;
 
-  --accent: #aa9f95;
-  --icon-color: #aa9f95;
+  --accent: #7a4b3a;
+  --accent-strong: #5c372a;
+
+  --icon-color: #aa7663;
+
+  --border-subtle: #e2d9cf;
+
+  --status-success: #4caf50;
+  --status-warning: #f4a261;
+  --status-error: #e63946;
 }
+
 
 /* =========================
    🌙 Dark Mode Overrides
    ========================= */
 .dark-mode {
-  --bg-body: #041111;
-  --bg-sidebar: #002849;
-  --bg-hover: #20B2AA;
-  --bg-calendar:#002849;
-  --bg-form:#002849 ;
+  --bg-body: #121212;
+  --bg-sidebar: #1e1e1e;
+  --bg-hover: #2a2a2a;
+  --bg-calendar: #1a1a1a;
+  --bg-form: #1e1e1e;
 
-
-  --text-primary: #E0F2F1;
+  --text-primary: #e8e6e3;
   --text-inverse: #ffffff;
 
-  --accent: #20B2AA;
-  --icon-color: #20B2AA;
+  --accent: #c08a6e;
+  --accent-strong: #a06b50;
+
+  --icon-color: #c08a6e;
+
+  --border-subtle: #2c2c2c;
+
+  --status-success: #66bb6a;
+  --status-warning: #f6bd60;
+  --status-error: #ef5350;
 }
 
 /* =========================
@@ -164,6 +180,8 @@ body {
 
   text-decoration: none;
   transition: 0.2s ease;
+
+  white-space: nowrap;
 }
 
 .sidebar-links li a:hover {
@@ -179,7 +197,6 @@ body {
   width: 2rem !important;
   height: 2rem !important;
 
-  stroke: var(--icon-color);
   flex-shrink: 0;
 
   transition: stroke 0.2s ease;
@@ -189,20 +206,17 @@ body {
   stroke: var(--text-primary);
 }
 
-#themeToggle {
-  position: relative;
-  z-index: 9999;
-}
-
 /* =========================
    🎯 Module
    ========================= */
 .title {
-    padding-bottom: 25px;
-    color: var(--text-primary);
-    font-size: 2.5rem;
-    font-weight: bolder;
-    margin: 0;
+  border-radius: 1rem;
+  background-color: var(--bg-form);
+  padding: 15px;
+  color: var(--text-primary);
+  font-size: 2.5rem;
+  font-weight: bolder;
+  margin-bottom: 25px;
 }
 
 .module-container {
@@ -316,4 +330,9 @@ body {
 
 .ht_master ::-webkit-scrollbar-thumb {
     background: #c1c1c1;
+  padding: 1.5rem;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background-color: var(--bg-body);
 }

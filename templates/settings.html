@@ -1,24 +1,79 @@
 {% extends 'base.html' %}
 
-
 {% block title %}Settings{% endblock %}
 
-
 {% block head %}
-    <link rel="stylesheet" href="{{ url_for('static', filename='styles/settings.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='styles/settings.css') }}">
 {% endblock %}
-
 
 {% block content %}
-    <div class="module-container">
-        <div class="module-header">
-            <h1 class="title">Settings</h1>
-        </div>
-        
+<div class="module-container">
+    <div class="module-header">
+        <h1 class="title">Settings</h1>
     </div>
+
+    <div class="settings-form">
+
+        <!-- 1. THEME -->
+        <div class="settings-section">
+            <h2 class="section-header">Theme</h2>
+            <div class="section-content">
+                <div class="form-group">
+                    <label>Theme Mode</label>
+                    <select>
+                        <option>Light</option>
+                        <option>Dark</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+
+        <!-- 2. FONT SETTINGS -->
+        <div class="settings-section">
+            <h2 class="section-header">Font Settings</h2>
+            <div class="section-content">
+                <div class="form-group">
+                    <label>Font Style</label>
+                    <select>
+                        <option>Sans-serif</option>
+                        <option>Serif</option>
+                        <option>Monospace</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label>Font Size</label>
+                    <select>
+                        <option>Small</option>
+                        <option selected>Medium</option>
+                        <option>Large</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+
+        <!-- 3. KEYBINDS -->
+        <div class="settings-section">
+            <h2 class="section-header">Keybind & Controls</h2>
+            <div class="section-content">
+                <div class="form-group">
+                    <label>Custom Control Map</label>
+                    <button class="btn">Edit Keybinds</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 4. EXTRA / PLACEHOLDER -->
+        <div class="settings-section">
+            <h2 class="section-header">Other</h2>
+            <div class="section-content">
+                <p class="placeholder-text">More settings coming soon...</p>
+            </div>
+        </div>
+
+    </div>
+</div>
 {% endblock %}
 
-
 {% block extra_scripts %}
-
 {% endblock %}
