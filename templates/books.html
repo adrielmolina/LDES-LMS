@@ -12,9 +12,10 @@
         <h1 class="title">Book Management</h1>
     </div>
 
-    <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addBookModal">Add Book</button>
-    <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#genreOverlayModal" onclick="loadGenres()">Add Genre</button>
-
+    <div id="buttons_container" class="buttons_container">
+        <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addBookModal" >Add Book (Ctrl + 1)</button>
+        <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#genreOverlayModal" onclick="loadGenres()">Add Genre (Ctrl + 2)</button>
+    </div>
     <!-- Genre Overlay Modal -->
     <div class="modal fade" id="genreOverlayModal" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered modal-lg">
@@ -231,7 +232,22 @@
             { data: 'illustrator' },
             { data: 'publisher' },
             { data: 'year', type: 'numeric' },
-            { data: 'category_id', type: 'numeric' },
+            /*
+            {
+                data: 'category_id',
+
+                type: 'dropdown',
+                source: function () {
+                    return window.genres.map(g => g.name);
+                },
+
+                renderer: function (instance, td, row, col, prop, value) {
+                    const name = window.genreMap[value] || '';
+                    td.innerText = name;
+                    return td;
+                }
+            },*/
+            { data: 'category_id', type: 'numeric'},
             { data: 'total', type: 'numeric' },
             { data: 'available', type: 'numeric' },
             { data: 'shelf' },
@@ -264,7 +280,7 @@
         minSpareRows: 1
         });
 
-
+        //TODO add filter for punctuations ex. slash and backslash, causes error on deletion
         // FOR THE GENRE;
         const genreModal = document.getElementById('genreOverlayModal');
         const searchInput = document.getElementById('genreSearch');
@@ -310,26 +326,43 @@
             selectedRow.scrollIntoView({ block: 'nearest' });
         }
 
-        
-
         function capitalizeWords(str) {
             return str
                 .toLowerCase()
                 .trim()
                 .split(/\s+/)
-                .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+                .filter(Boolean)
+                .map(word => word[0].toUpperCase() + word.slice(1))
                 .join(' ');
         }
-
-        function capitalizeWords(str) {
-            return str
-                .toLowerCase()
-                .split(' ')
-                .map(word => word.charAt(0).toUpperCase() + word.slice(1))
-                .join(' ');
-        }
-
         
+        // KEYBOARD SHORTCUTS
+        function openAddBookModal() {
+            const modal = new bootstrap.Modal(document.getElementById('addBookModal'));
+            modal.show();
+        }
+
+        function openAddGenreModal() {
+            loadGenres(); // 👈 keep your existing logic
+            const modal = new bootstrap.Modal(document.getElementById('genreOverlayModal'));
+            modal.show();
+        }
+
+        document.addEventListener('keydown', function (e) {
+            const tag = document.activeElement.tagName;
+
+            if (tag === 'INPUT' || tag === 'TEXTAREA') return;
+
+            if (e.ctrlKey && e.key === '1') {
+                e.preventDefault();
+                openAddBookModal();
+            }
+
+            if (e.ctrlKey && e.key === '2') {
+                e.preventDefault();
+                openAddGenreModal();
+            }
+        });
         
 
     </script>

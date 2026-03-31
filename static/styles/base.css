@@ -212,3 +212,108 @@ body {
     flex-direction: column;
     background-color: var(--bg-body);
 }
+
+/* ===== BASE ===== */
+.handsontable,
+.ht_master,
+.ht_master .wtHolder,
+.ht_master .wtHider {
+    background: #ffffff !important;
+    color: #000 !important;
+    font-family: Calibri, Arial, sans-serif;
+}
+
+/* ===== CELLS ===== */
+.handsontable td {
+    background: #ffffff !important;
+    color: #000 !important;
+}
+
+/* ===== HEADERS (Excel-like) ===== */
+.handsontable th {
+    background: #f3f3f3 !important;
+    color: #000 !important;
+    font-weight: 600;
+    border-color: #d0d0d0 !important;
+}
+
+/* ===== GRIDLINES ===== */
+.handsontable td,
+.handsontable th {
+    border-color: #dcdcdc !important;
+}
+
+/* ===== READONLY CELLS (FIXED) ===== */
+.handsontable .htDimmed,
+.handsontable .htReadOnly {
+    background: #f5f5f5 !important;
+    color: #666 !important;
+}
+
+/* ===== SELECTION (Excel green) ===== */
+.handsontable .ht__selection,
+.handsontable .area {
+    background: rgba(33, 115, 70, 0.15) !important;
+}
+
+.handsontable .current {
+    outline: 2px solid #217346 !important; /* Excel green */
+}
+
+/* ===== FILTER / DROPDOWN BUTTON ===== */
+.handsontable .changeType,
+.handsontable .htDropdownMenu {
+    background: transparent !important;
+    color: #444 !important;
+}
+
+/* ===== FILTER MENU PANEL (FIX BLACK BOX) ===== */
+.htMenu,
+.htFiltersConditionsMenu,
+.htUISelect,
+.htDropdownMenu {
+    background: #ffffff !important;
+    color: #000 !important;
+    border: 1px solid #ccc !important;
+}
+
+/* ===== FILTER INPUT (FIX BLACK INPUT) ===== */
+.htMenu input,
+.htFiltersConditionsMenu input,
+.htUISelect input {
+    background: #ffffff !important;
+    color: #000 !important;
+    border: 1px solid #ccc !important;
+}
+
+/* ===== BUTTONS IN FILTER (OK / CANCEL) ===== */
+.htMenu button {
+    background: #f3f3f3 !important;
+    color: #000 !important;
+    border: 1px solid #ccc !important;
+}
+
+.htMenu button:hover {
+    background: #e2e2e2 !important;
+}
+
+/* ===== ACTIVE BUTTON (Excel green accent) ===== */
+.htMenu button.htItemWrapperActive {
+    background: #217346 !important;
+    color: #fff !important;
+    border-color: #217346 !important;
+}
+
+/* ===== EMPTY AREA (FIX BLACK SPACE) ===== */
+.ht_master .wtHolder {
+    background: #ffffff !important;
+}
+
+/* ===== SCROLLBAR AREA (optional polish) ===== */
+.ht_master ::-webkit-scrollbar {
+    background: #f1f1f1;
+}
+
+.ht_master ::-webkit-scrollbar-thumb {
+    background: #c1c1c1;
+}

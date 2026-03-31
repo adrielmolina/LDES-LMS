@@ -1,3 +1,11 @@
+/*
+// 👇 ADD THESE GLOBALS (top of your JS file ideally)
+window.genres = [];
+window.genreMap = {};
+window.genreReverseMap = {};
+*/
+//TODO temporarily removed fix later
+
 async function loadGenres() {
     const tbody = document.querySelector('#genreTable tbody');
 
@@ -8,6 +16,17 @@ async function loadGenres() {
         const res = await fetch('/api/categories');
         const result = await res.json();
 
+        /*
+        // 🔥 ADD THIS BLOCK
+        window.genres = result.data;
+        window.genreMap = {};
+        window.genreReverseMap = {};
+
+        result.data.forEach(g => {
+            window.genreMap[g.category_id] = g.name;
+            window.genreReverseMap[g.name] = g.category_id;
+        });
+        */
         // 👇 clear loading
         tbody.innerHTML = "";
 
