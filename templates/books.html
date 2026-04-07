@@ -172,35 +172,36 @@
     <script>
         document.addEventListener("DOMContentLoaded", function () {
             loadGenres();
+            loadBooks();
+
         });
+
+        async function loadBooks() {
+            try {
+                const res = await fetch('/api/books');
+                const result = await res.json();
+
+                if (result.error) {
+                    console.error(result.error);
+                    return;
+                }
+
+                hot.loadData(result.data); // 🔥 THIS replaces your dummy data
+
+            } catch (err) {
+                console.error(err);
+            }
+        }
 
         // FOR THE BOOKS TABLE
         const container = document.getElementById('booksTable');
 
+        // empty data initalize
         const data = [
-        {
-            book_id: 1,
-            accession_start: 1001,
-            accession_end: 1005,
-            isbn: "9781234567890",
-            title: "Sample Book",
-            author: "John Doe",
-            illustrator: "Jane Smith",
-            publisher: "Sample Publisher",
-            year: 2026,
-            category_id: 2,
-            total: 10,
-            available: 8,
-            shelf: "A1",
-            created: "2026-03-18",
-            updated: "2026-03-18",
-            grade: "KS 1 - Kinder to Grade 3",
-            pages: 120
-        }
         ];
 
         const hot = new Handsontable(container, {
-        data: data,
+        //data: data,
 
         colHeaders: [
             "Book ID",
@@ -224,14 +225,14 @@
 
         columns: [
             { data: 'book_id', readOnly: true },
-            { data: 'accession_start', type: 'numeric' },
-            { data: 'accession_end', type: 'numeric' },
+            { data: 'accession_no_start', type: 'numeric' },
+            { data: 'accession_no_end', type: 'numeric' },
             { data: 'isbn' },
             { data: 'title' },
             { data: 'author' },
             { data: 'illustrator' },
             { data: 'publisher' },
-            { data: 'year', type: 'numeric' },
+            { data: 'publication_year', type: 'numeric' },
             /*
             {
                 data: 'category_id',
@@ -248,14 +249,66 @@
                 }
             },*/
             { data: 'category_id', type: 'numeric'},
-            { data: 'total', type: 'numeric' },
-            { data: 'available', type: 'numeric' },
-            { data: 'shelf' },
-            { data: 'created', type: 'date', dateFormat: 'YYYY-MM-DD' },
-            { data: 'updated', type: 'date', dateFormat: 'YYYY-MM-DD' },
-            { data: 'grade' },
-            { data: 'pages', type: 'numeric' }
+            { data: 'total_copies', type: 'numeric' },
+            { data: 'available_copies', type: 'numeric' },
+            { data: 'shelf_location' },
+            { data: 'created_at', type: 'date', dateFormat: 'YYYY-MM-DD' },
+            { data: 'last_updated_at', type: 'date', dateFormat: 'YYYY-MM-DD' },
+            { data: 'key_stage_grade_level' },
+            { data: 'no_of_pages', type: 'numeric' }
         ],
+        
+        afterChange: async function (changes, source) {
+            if (!changes || source === 'loadData') return;
+
+            for (const [row, prop, oldVal, newVal] of changes) {
+
+                if (oldVal === newVal) continue;
+
+                let bookId = hot.getDataAtRowProp(row, 'book_id');
+
+                try {
+                    // 🔥 1. CREATE row if needed
+                    if (!bookId && newVal !== null && newVal !== '') {
+
+                        const res = await fetch('/api/books', {
+                            method: 'POST'
+                        });
+
+                        const result = await res.json();
+
+                        if (result.error) {
+                            console.error(result.error);
+                            return;
+                        }
+
+                        bookId = result.book_id;
+
+                        // set ID without retriggering loop
+                        hot.setDataAtRowProp(row, 'book_id', bookId, 'internal');
+                    }
+
+                    // 🔥 2. UPDATE the edited field
+                    if (bookId && prop !== 'book_id') {
+
+                        await fetch(`/api/books/${bookId}`, {
+                            method: 'PUT',
+                            headers: {
+                                'Content-Type': 'application/json'
+                            },
+                            body: JSON.stringify({
+                                field: prop,
+                                value: newVal
+                            })
+                        });
+
+                    }
+
+                } catch (err) {
+                    console.error(err);
+                }
+            }
+        },
 
         // 🔥 Excel-like features
         rowHeaders: true,
@@ -364,6 +417,7 @@
             }
         });
         
+    
 
     </script>
 
