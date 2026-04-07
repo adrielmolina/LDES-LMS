@@ -13,8 +13,14 @@
     </div>
 
     <div id="buttons_container" class="buttons_container">
-        <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addBookModal" >Add Book (Ctrl + 1)</button>
-        <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#genreOverlayModal" onclick="loadGenres()">Add Genre (Ctrl + 2)</button>
+        <div class="button-group-left">
+            <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addBookModal">Add Book (Ctrl + 1)</button>
+            <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#genreOverlayModal" onclick="loadGenres()">Add Genre (Ctrl + 2)</button>
+        </div>
+        <div class="search-wrapper">
+            <span class="search-icon">🔍</span>
+            <input type="text" id="searchInput" class="form-control search-input" placeholder="Search books...">
+        </div>
     </div>
     <!-- Genre Overlay Modal -->
     <div class="modal fade" id="genreOverlayModal" tabindex="-1" aria-hidden="true">
