@@ -87,8 +87,11 @@ def get_categories():
     rows = cursor.fetchall()
 
     data = [dict(row) for row in rows]
-
+    
+    conn.close()
+    
     return {"data": data}
+
 
 
 @server.route("/api/categories", methods=["POST"])
@@ -115,6 +118,8 @@ def add_category():
     except Exception as e:
         return jsonify({"error": str(e)}), 500
     
+    finally:
+        conn.close()
     
 @server.route("/api/categories/<int:id>", methods=["PUT"])
 def update_category(id):
@@ -147,6 +152,8 @@ def update_category(id):
         print("DB ERROR:", e)
         return jsonify({"error": str(e)}), 500
     
+    finally:
+        conn.close()
     
 @server.route("/api/categories/<int:id>", methods=["DELETE"])
 def delete_category(id):
@@ -164,6 +171,113 @@ def delete_category(id):
         print("DB ERROR:", e)
         return jsonify({"error": str(e)}), 500    
     
+    finally:
+        conn.close()
+
+
+@server.route("/api/books", methods=["GET"])
+def get_books():
+    conn = db_conn.conn_init()
+    cursor = conn.cursor()
+
+    try:
+        cursor.execute("SELECT * FROM books")
+        rows = cursor.fetchall()
+
+        data = [dict(row) for row in rows]
+
+        return jsonify({"data": data})
+
+    except Exception as e:
+        print("DB ERROR:", e)
+        return jsonify({"error": str(e)}), 500
+
+    finally:
+        conn.close()
+
+
+@server.route("/api/books", methods=["POST"])
+def create_book():
+    conn = db_conn.conn_init()
+    cursor = conn.cursor()
+
+    try:
+        # insert minimal/default row
+        cursor.execute("""
+            INSERT INTO books DEFAULT VALUES
+        """)
+        '''cursor.execute("""
+            INSERT INTO books (
+                accession_no_start,
+                accession_no_end,
+                isbn,
+                title,
+                author,
+                illustrator,
+                publisher,
+                publication_year,
+                category_id,
+                total_copies,
+                available_copies,
+                shelf_location,
+                created_at,
+                last_updated_at,
+                key_stage_grade_level,
+                no_of_pages
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        """, (
+            0, 0, "TEMP", "TEMP", "TEMP", "TEMP", "TEMP",
+            2000, 1, 0, 0, "TEMP",
+            date.today(),
+            date.today(),
+            "KS 1 - Kinder to Grade 3",
+            0
+        ))'''
+
+        conn.commit()
+
+        book_id = cursor.lastrowid
+
+        return jsonify({
+            "success": True,
+            "book_id": book_id
+        })
+
+    except Exception as e:
+        print("DB ERROR:", e)
+        return jsonify({"error": str(e)}), 500
+    
+    finally:
+        conn.close()
+
+
+@server.route("/api/books/<int:book_id>", methods=["PUT"])
+def update_book(book_id):
+    from flask import request, jsonify
+
+    data = request.get_json()
+    field = data.get("field")
+    value = data.get("value")
+
+    if not field:
+        return jsonify({"error": "Field required"}), 400
+
+    conn = db_conn.conn_init()
+    cursor = conn.cursor()
+
+    try:
+        query = f"UPDATE books SET {field} = ? WHERE book_id = ?"
+        cursor.execute(query, (value, book_id))
+        conn.commit()
+
+        return jsonify({"success": True})
+
+    except Exception as e:
+        print("DB ERROR:", e)
+        return jsonify({"error": str(e)}), 500
+
+    finally:
+        conn.close()
 
 #? -------------------- END -------------------- ?#
 
