@@ -13,16 +13,15 @@
     </div>
 
     <div class="settings-form">
-
-        <!-- 1. THEME -->
+        <!-- THEME SECTION -->
         <div class="settings-section">
             <h2 class="section-header">Theme</h2>
             <div class="section-content">
                 <div class="form-group">
                     <label>Theme Mode</label>
-                    <select>
-                        <option>Light</option>
-                        <option>Dark</option>
+                    <select id="theme-select">
+                        <option value="light">Light</option>
+                        <option value="dark">Dark</option>
                     </select>
                 </div>
             </div>
@@ -34,19 +33,19 @@
             <div class="section-content">
                 <div class="form-group">
                     <label>Font Style</label>
-                    <select>
-                        <option>Sans-serif</option>
-                        <option>Serif</option>
-                        <option>Monospace</option>
+                    <select id="font-style-select">
+                        <option value="sans-serif">Sans-serif</option>
+                        <option value="serif">Serif</option>
+                        <option value="monospace">Monospace</option>
                     </select>
                 </div>
 
                 <div class="form-group">
                     <label>Font Size</label>
-                    <select>
-                        <option>Small</option>
-                        <option selected>Medium</option>
-                        <option>Large</option>
+                    <select id="font-size-select">
+                        <option value="small">Small</option>
+                        <option value="medium" selected>Medium</option>
+                        <option value="large">Large</option>
                     </select>
                 </div>
             </div>
