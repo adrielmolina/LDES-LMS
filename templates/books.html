@@ -19,7 +19,8 @@
         </div>
         <div class="search-wrapper">
             <span class="search-icon">🔍</span>
-            <input type="text" id="searchInput" class="form-control search-input" placeholder="Search books...">
+                <input type="text" id="searchTable" class="form-control search-input" placeholder="Search books...">
+                <button id="clearSearchInput">×</button>
         </div>
     </div>
     <!-- Genre Overlay Modal -->
@@ -175,14 +176,17 @@
 {% endblock %}
 
 {% block extra_scripts %}
+    <script src="{{ url_for('static', filename='js/genreCRUD.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/searchBar.js') }}"></script>
     <script>
-        document.addEventListener("DOMContentLoaded", function () {
-            loadGenres();
+        document.addEventListener("DOMContentLoaded", async function () {
+            await loadGenres();
             loadBooks();
 
         });
-
-        async function loadBooks() {
+        
+        //overwritten in the seachbar.js, but keeping this here for reference
+        /*async function loadBooks() {
             try {
                 const res = await fetch('/api/books');
                 const result = await res.json();
@@ -197,7 +201,7 @@
             } catch (err) {
                 console.error(err);
             }
-        }
+        }*/
 
         // FOR THE BOOKS TABLE
         const container = document.getElementById('booksTable');
@@ -239,79 +243,139 @@
             { data: 'illustrator' },
             { data: 'publisher' },
             { data: 'publication_year', type: 'numeric' },
-            /*
+            
             {
                 data: 'category_id',
-
                 type: 'dropdown',
-                source: function () {
-                    return window.genres.map(g => g.name);
-                },
-
+                source: [],
                 renderer: function (instance, td, row, col, prop, value) {
-                    const name = window.genreMap[value] || '';
-                    td.innerText = name;
+                    console.log('RENDERER value:', value, typeof value, 'genreMap:', JSON.stringify(window.genreMap));
+                    const name = window.genreMap?.[Number(value)] || null;
+                    if (!name && value) {
+                        td.innerText = `Unknown (ID: ${value})`;
+                        td.style.color = 'red';
+                    } else {
+                        td.innerText = name || '';
+                        td.style.color = '';  // 👈 don't forget this reset
+                    }
                     return td;
                 }
-            },*/
-            { data: 'category_id', type: 'numeric'},
+            },
+            //{ data: 'category_id', type: 'numeric'},
             { data: 'total_copies', type: 'numeric' },
             { data: 'available_copies', type: 'numeric' },
             { data: 'shelf_location' },
-            { data: 'created_at', type: 'date', dateFormat: 'YYYY-MM-DD' },
-            { data: 'last_updated_at', type: 'date', dateFormat: 'YYYY-MM-DD' },
-            { data: 'key_stage_grade_level' },
+            { data: 'created_at', type: 'date', dateFormat: 'YYYY-MM-DD' , readOnly: true},
+            { data: 'last_updated_at', type: 'date', dateFormat: 'YYYY-MM-DD' , readOnly: true},
+            //{ data: 'key_stage_grade_level' },
+            {
+                data: 'key_stage_grade_level',
+                type: 'dropdown',
+                source: [
+                    "KS 1 - Kinder to Grade 3",
+                    "KS 1 & 2 - Kinder to Grade 6",
+                    "KS 2 - Grade 4 to 6",
+                    "KS 4 - Grade 11 to 12",
+                    "KS 3 & 4 - Grade 7 to 12",
+                    "KS 3 - Grade 7 to 10",
+                    "Kinder to Grade 1",
+                    "KS 2 & 3 - Grade 4 to 10",
+                    "KS 1 - Kinder at Grade 3"
+                ],
+                strict: true,
+                allowInvalid: false
+            },
             { data: 'no_of_pages', type: 'numeric' }
         ],
         
-        afterChange: async function (changes, source) {
-            if (!changes || source === 'loadData') return;
+        afterChange: function (changes, source) {
+            
+            if (!changes || source === 'loadData' || source === 'internal') return;
 
-            for (const [row, prop, oldVal, newVal] of changes) {
+            changes.forEach(([row, prop, oldVal, newVal]) => {
+                if (oldVal === newVal) return;
 
-                if (oldVal === newVal) continue;
+                let valueToSave = newVal;
+                if (prop === 'category_id' && window.genreReverseMap?.[newVal]) {
+                    valueToSave = window.genreReverseMap[newVal];
+                    console.log('newVal:', newVal, 'valueToSave:', valueToSave); // 👈 inside forEach
+                    // 👇 add this line here
+                    hot.setDataAtRowProp(row, 'category_id', valueToSave, 'internal');
+                    //hot.getSourceData()[row][prop] = valueToSave;
+                    //hot.render();
+
+                }
 
                 let bookId = hot.getDataAtRowProp(row, 'book_id');
 
-                try {
-                    // 🔥 1. CREATE row if needed
-                    if (!bookId && newVal !== null && newVal !== '') {
+                if (!bookId) {
+                    fetch('/api/books', { method: 'POST' })
+                        .then(r => r.json())
+                        .then(result => {
+                            if (result.error) { console.error(result.error); return; }
+                            hot.setDataAtRowProp(row, 'book_id', result.book_id, 'internal');
+                            // 👇 set created_at and last_updated_at on new row
+                            const today = new Date().toISOString().split('T')[0];
+                            hot.setDataAtRowProp(row, 'created_at', today, 'internal');
+                            hot.setDataAtRowProp(row, 'last_updated_at', today, 'internal');
+                            return saveField(result.book_id, prop, valueToSave);
+                        })
+                        .catch(console.error);
+                } else {
+                    saveField(bookId, prop, valueToSave);
+                }
+            });
+        },
 
-                        const res = await fetch('/api/books', {
-                            method: 'POST'
-                        });
+        contextMenu: {
+            items: {
+                'copy': {},
+                'cut': {},
+                'separator1': Handsontable.plugins.ContextMenu.SEPARATOR,
+                'delete_row_custom': {
+                    name: 'Remove row',
+                    callback: function(key, selection) {
+                        const row = selection[0].start.row;
+                        const bookId = hot.getDataAtRowProp(row, 'book_id');
 
-                        const result = await res.json();
-
-                        if (result.error) {
-                            console.error(result.error);
+                        if (!bookId) {
+                            hot.alter('remove_row', row);
                             return;
                         }
 
-                        bookId = result.book_id;
+                        if (!confirm(`Delete book ID ${bookId}? This cannot be undone.`)) return;
 
-                        // set ID without retriggering loop
-                        hot.setDataAtRowProp(row, 'book_id', bookId, 'internal');
-                    }
-
-                    // 🔥 2. UPDATE the edited field
-                    if (bookId && prop !== 'book_id') {
-
-                        await fetch(`/api/books/${bookId}`, {
-                            method: 'PUT',
-                            headers: {
-                                'Content-Type': 'application/json'
-                            },
-                            body: JSON.stringify({
-                                field: prop,
-                                value: newVal
+                        fetch(`/api/books/${bookId}`, { method: 'DELETE' })
+                            .then(r => r.json())
+                            .then(result => {
+                                if (result.error) {
+                                    alert('Failed to delete: ' + result.error);
+                                    return;
+                                }
+                                hot.alter('remove_row', row);
                             })
-                        });
-
+                            .catch(err => {
+                                console.error(err);
+                                alert('Something went wrong.');
+                            });
                     }
+                }
+            }
+        },
 
-                } catch (err) {
-                    console.error(err);
+        //allow only digits for certain columns 
+        beforeKeyDown: function(e) {
+            const selected = this.getSelectedLast();
+            if (!selected) return;
+
+            const col = selected[1];
+            const numericCols = [1, 2, 3, 8, 10, 11, 16]; // accession_start, accession_end, isbn, year, total, available, pages
+
+            if (numericCols.includes(col)) {
+                const allowed = ['Backspace', 'Delete', 'ArrowLeft', 'ArrowRight', 'Tab', 'Enter'];
+                if (!allowed.includes(e.key) && !/^\d$/.test(e.key)) {
+                    e.stopImmediatePropagation();
+                    e.preventDefault();
                 }
             }
         },
@@ -321,7 +385,7 @@
 
         // Editing
         licenseKey: 'non-commercial-and-evaluation',
-        contextMenu: true, // right-click menu
+        //contextMenu: true, // overwritten above 
         manualColumnResize: true,
         manualRowResize: true,
 
@@ -337,7 +401,28 @@
 
         // Auto new row
         minSpareRows: 1
+
         });
+
+        function saveField(bookId, prop, value) {
+            if (prop === 'book_id') return;
+            return fetch(`/api/books/${bookId}`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ field: prop, value: value })
+            })
+            .then(r => r.json())
+            .then(result => {
+                if (result.error) { console.error(result.error); return; }
+                // 👇 update last_updated_at in the table
+                const today = new Date().toISOString().split('T')[0];
+                const rowIndex = hot.getSourceData().findIndex(r => r.book_id === bookId);
+                if (rowIndex !== -1) {
+                    hot.setDataAtRowProp(rowIndex, 'last_updated_at', today, 'internal');
+                }
+            })
+            .catch(console.error);
+        }
 
         //TODO add filter for punctuations ex. slash and backslash, causes error on deletion
         // FOR THE GENRE;
@@ -423,10 +508,11 @@
             }
         });
         
-    
+        document.getElementById('clearSearchInput').addEventListener('click', function() {
+            const searchInput = document.getElementById('searchTable');
+            searchInput.value = '';
+            searchInput.dispatchEvent(new Event('input')); // trigger the input event to refresh the table
+        });
 
     </script>
-
-    <script src="{{ url_for('static', filename='js/genreCRUD.js') }}"></script>
-    
 {% endblock %}
