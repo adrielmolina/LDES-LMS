@@ -166,6 +166,7 @@
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
                 <button type="button" class="btn btn-primary" id="saveBookBtn">Save Book</button>
+                <!-- TODO disable when empty -->
             </div>
         </div>
     </div>
@@ -512,6 +513,39 @@
             const searchInput = document.getElementById('searchTable');
             searchInput.value = '';
             searchInput.dispatchEvent(new Event('input')); // trigger the input event to refresh the table
+        });
+
+        <!-- TODO finish next week -->
+        function collectBookFormData() {
+            return {
+                accession_start: document.getElementById('accessionStart').value.trim(),
+                accession_end: document.getElementById('accessionEnd').value.trim(),
+                isbn: document.getElementById('isbn').value.trim(),
+                title: document.getElementById('title').value.trim(),
+
+                author: document.getElementById('author').value.trim(),
+                illustrator: document.getElementById('illustrator').value.trim(),
+                publisher: document.getElementById('publisher').value.trim(),
+                publication_year: document.getElementById('publicationYear').value.trim(),
+
+                category_id: document.getElementById('categoryId').value.trim(),
+                total_copies: document.getElementById('totalCopies').value,
+                available_copies: document.getElementById('availableCopies').value,
+                shelf_location: document.getElementById('shelfLocation').value.trim(),
+
+                key_stage_grade_level: document.getElementById('keyStage').value,
+                no_of_pages: document.getElementById('noOfPages').value,
+
+                created_at: document.getElementById('createdAt').value,
+                last_updated_at: document.getElementById('lastUpdated').value
+            };
+        }
+        document.getElementById('saveBookBtn').addEventListener('click', () => {
+            const bookData = collectBookFormData();
+
+            console.log(bookData); // 👈 for now
+
+            // later: send to API
         });
 
     </script>
