@@ -1,432 +1,332 @@
 {% extends 'base.html' %}
 
-{% block title %}Books Management{% endblock %}
+{% block title %}Book management — LMS{% endblock %}
+{% block page_title %}Book management{% endblock %}
 
 {% block head %}
-    <link rel="stylesheet" href="{{ url_for('static', filename='styles/books.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='styles/books.css') }}">
 {% endblock %}
 
 {% block content %}
 <div class="module-container">
-    <div class="module-header">
-        <h1 class="title">Book Management</h1>
+
+  <!-- Toolbar -->
+  <div class="toolbar card-surface">
+    <div class="toolbar-left">
+      <button type="button" class="tbtn tbtn--primary" data-bs-toggle="modal" data-bs-target="#addBookModal">
+        <svg viewBox="0 0 24 24" fill="none"><path d="M12 5V19M5 12H19" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+        Add book
+        <span class="tbtn-kbd">Ctrl+1</span>
+      </button>
+      <button type="button" class="tbtn" data-bs-toggle="modal" data-bs-target="#genreOverlayModal" onclick="loadGenres()">
+        <svg viewBox="0 0 24 24" fill="none"><path d="M4 6H20M4 12H14M4 18H9" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+        Manage genres
+        <span class="tbtn-kbd">Ctrl+2</span>
+      </button>
     </div>
-
-    <div id="buttons_container" class="buttons_container">
-        <div class="button-group-left">
-            <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addBookModal">Add Book (Ctrl + 1)</button>
-            <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#genreOverlayModal" onclick="loadGenres()">Add Genre (Ctrl + 2)</button>
-        </div>
-        <div class="search-wrapper">
-            <span class="search-icon">🔍</span>
-            <input type="text" id="searchInput" class="form-control search-input" placeholder="Search books...">
-        </div>
+    <div class="search-wrap">
+      <svg class="search-icon" viewBox="0 0 24 24" fill="none">
+        <circle cx="11" cy="11" r="7" stroke="currentColor" stroke-width="1.5"/>
+        <path d="M20 20L16.65 16.65" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+      </svg>
+      <input type="text" id="searchInput" class="search-input" placeholder="Search books…">
     </div>
-    <!-- Genre Overlay Modal -->
-    <div class="modal fade" id="genreOverlayModal" tabindex="-1" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered modal-lg">
-            <div class="modal-content p-3">
-                <!-- Search bar -->
-                <div class="mb-3">
-                    <input type="text" id="genreSearch" class="form-control" placeholder="Search or add genre...">
-                </div>
+  </div>
 
-                <!-- Genre Table -->
-                <table class="table" id="genreTable">
-                    <thead>
-                        <tr>
-                            <th>Genre</th>
-                            <th>Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr>
-                            <td>Fantasy</td>
-                            <td>
-                                <button class="btn btn-sm btn-warning">Edit</button>
-                                <button class="btn btn-sm btn-danger">Delete</button>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td>Science Fiction</td>
-                            <td>
-                                <button class="btn btn-sm btn-warning">Edit</button>
-                                <button class="btn btn-sm btn-danger">Delete</button>
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
+  <!-- Books table -->
+  <div class="table-card card-surface">
+    <div id="booksTable"></div>
+  </div>
 
-                <!-- Add button (dynamic) -->
-                <div class="text-end">
-                    <button class="btn btn-success" id="addGenreBtn" disabled>Add Genre</button>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Add Book Modal -->
-<div class="modal fade" id="addBookModal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered modal-xl">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title">Add New Book</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body">
-                <form id="addBookForm">
-                    <!-- Row 1 -->
-                    <div class="row mb-3">
-                        <div class="col-md-3">
-                            <label for="accessionStart" class="form-label">Accession Start</label>
-                            <input type="text" class="form-control" id="accessionStart" placeholder="Enter Accession Start">
-                        </div>
-                        <div class="col-md-3">
-                            <label for="accessionEnd" class="form-label">Accession End</label>
-                            <input type="text" class="form-control" id="accessionEnd" placeholder="Enter Accession End">
-                        </div>
-                        <div class="col-md-3">
-                            <label for="isbn" class="form-label">ISBN</label>
-                            <input type="text" class="form-control" id="isbn" placeholder="Enter ISBN">
-                        </div>
-                        <div class="col-md-3">
-                            <label for="title" class="form-label">Title</label>
-                            <input type="text" class="form-control" id="title" placeholder="Enter Book Title">
-                        </div>
-                    </div>
-
-                    <!-- Row 2 -->
-                    <div class="row mb-3">
-                        <div class="col-md-3">
-                            <label for="author" class="form-label">Author</label>
-                            <input type="text" class="form-control" id="author" placeholder="Enter Author">
-                        </div>
-                        <div class="col-md-3">
-                            <label for="illustrator" class="form-label">Illustrator</label>
-                            <input type="text" class="form-control" id="illustrator" placeholder="Enter Illustrator">
-                        </div>
-                        <div class="col-md-3">
-                            <label for="publisher" class="form-label">Publisher</label>
-                            <input type="text" class="form-control" id="publisher" placeholder="Enter Publisher">
-                        </div>
-                        <div class="col-md-3">
-                            <label for="publicationYear" class="form-label">Publication Year</label>
-                            <input type="text" class="form-control" id="publicationYear" placeholder="Enter Publication Year">
-                        </div>
-                    </div>
-
-                    <!-- Row 3 -->
-                    <div class="row mb-3">
-                        <div class="col-md-3">
-                            <label for="categoryId" class="form-label">Category ID</label>
-                            <input type="text" class="form-control" id="categoryId" placeholder="Enter Category ID">
-                        </div>
-                        <div class="col-md-3">
-                            <label for="totalCopies" class="form-label">Total Copies</label>
-                            <input type="number" class="form-control" id="totalCopies" placeholder="Total Copies">
-                        </div>
-                        <div class="col-md-3">
-                            <label for="availableCopies" class="form-label">Available Copies</label>
-                            <input type="number" class="form-control" id="availableCopies" placeholder="Available Copies">
-                        </div>
-                        <div class="col-md-3">
-                            <label for="shelfLocation" class="form-label">Shelf Location</label>
-                            <input type="text" class="form-control" id="shelfLocation" placeholder="Enter Shelf Location">
-                        </div>
-                    </div>
-
-                    <!-- Row 4 -->
-                    <div class="row">
-                        <div class="col-md-3">
-                            <label for="keyStage" class="form-label">Key Stage Grade Level</label>
-                            <select class="form-select" id="keyStage">
-                                <option value="">Select Key Stage</option>
-                                <option value="KS 1 - Kinder to Grade 3">KS 1 - Kinder to Grade 3</option>
-                                <option value="KS 2 - Grade 4 to Grade 6">KS 2 - Grade 4 to Grade 6</option>
-                                <option value="KS 3 - Grade 7 to Grade 10">KS 3 - Grade 7 to Grade 10</option>
-                                <option value="KS 4 - Grade 11 to Grade 12">KS 4 - Grade 11 to Grade 12</option>
-                            </select>
-                        </div>
-                        <div class="col-md-3">
-                            <label for="noOfPages" class="form-label">No. of Pages</label>
-                            <input type="number" class="form-control" id="noOfPages" placeholder="Enter number of pages">
-                        </div>
-                        <div class="col-md-3">
-                            <label for="createdAt" class="form-label">Created At</label>
-                            <input type="date" class="form-control" id="createdAt">
-                        </div>
-                        <div class="col-md-3">
-                            <label for="lastUpdated" class="form-label">Last Updated At</label>
-                            <input type="date" class="form-control" id="lastUpdated">
-                        </div>
-                    </div>
-                </form>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                <button type="button" class="btn btn-primary" id="saveBookBtn">Save Book</button>
-            </div>
-        </div>
-    </div>
 </div>
 
-    <div id="booksTable"></div>
+<!-- ===== Genre Modal ===== -->
+<div class="modal fade" id="genreOverlayModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered" style="max-width: 480px;">
+    <div class="modal-content lms-modal">
+      <div class="lms-modal-header">
+        <h5 class="lms-modal-title">Manage genres</h5>
+        <button type="button" class="lms-modal-close" data-bs-dismiss="modal" aria-label="Close">
+          <svg viewBox="0 0 24 24" fill="none"><path d="M18 6L6 18M6 6L18 18" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+        </button>
+      </div>
+      <div class="lms-modal-body">
+        <div class="search-wrap" style="margin-bottom: 14px;">
+          <svg class="search-icon" viewBox="0 0 24 24" fill="none">
+            <circle cx="11" cy="11" r="7" stroke="currentColor" stroke-width="1.5"/>
+            <path d="M20 20L16.65 16.65" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+          </svg>
+          <input type="text" id="genreSearch" class="search-input" placeholder="Search or add genre…">
+        </div>
+        <table class="lms-table" id="genreTable">
+          <thead>
+            <tr>
+              <th>Genre</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Fantasy</td>
+              <td class="actions-cell">
+                <button class="tbtn tbtn--sm">Edit</button>
+                <button class="tbtn tbtn--sm tbtn--danger">Delete</button>
+              </td>
+            </tr>
+            <tr>
+              <td>Science Fiction</td>
+              <td class="actions-cell">
+                <button class="tbtn tbtn--sm">Edit</button>
+                <button class="tbtn tbtn--sm tbtn--danger">Delete</button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="lms-modal-footer">
+        <button class="tbtn tbtn--primary" id="addGenreBtn" disabled>Add genre</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== Add Book Modal ===== -->
+<div class="modal fade" id="addBookModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered modal-xl">
+    <div class="modal-content lms-modal">
+      <div class="lms-modal-header">
+        <h5 class="lms-modal-title">Add new book</h5>
+        <button type="button" class="lms-modal-close" data-bs-dismiss="modal" aria-label="Close">
+          <svg viewBox="0 0 24 24" fill="none"><path d="M18 6L6 18M6 6L18 18" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+        </button>
+      </div>
+      <div class="lms-modal-body">
+        <form id="addBookForm">
+          <div class="form-grid">
+            <div class="form-group">
+              <label for="accessionStart">Accession start</label>
+              <input type="text" class="form-input" id="accessionStart" placeholder="e.g. 001">
+            </div>
+            <div class="form-group">
+              <label for="accessionEnd">Accession end</label>
+              <input type="text" class="form-input" id="accessionEnd" placeholder="e.g. 005">
+            </div>
+            <div class="form-group">
+              <label for="isbn">ISBN</label>
+              <input type="text" class="form-input" id="isbn" placeholder="978-…">
+            </div>
+            <div class="form-group">
+              <label for="title">Title</label>
+              <input type="text" class="form-input" id="title" placeholder="Book title">
+            </div>
+          </div>
+
+          <div class="form-grid">
+            <div class="form-group">
+              <label for="author">Author</label>
+              <input type="text" class="form-input" id="author" placeholder="Author name">
+            </div>
+            <div class="form-group">
+              <label for="illustrator">Illustrator</label>
+              <input type="text" class="form-input" id="illustrator" placeholder="Illustrator">
+            </div>
+            <div class="form-group">
+              <label for="publisher">Publisher</label>
+              <input type="text" class="form-input" id="publisher" placeholder="Publisher">
+            </div>
+            <div class="form-group">
+              <label for="publicationYear">Publication year</label>
+              <input type="text" class="form-input" id="publicationYear" placeholder="e.g. 2024">
+            </div>
+          </div>
+
+          <div class="form-grid">
+            <div class="form-group">
+              <label for="categoryId">Category ID</label>
+              <input type="text" class="form-input" id="categoryId" placeholder="ID">
+            </div>
+            <div class="form-group">
+              <label for="totalCopies">Total copies</label>
+              <input type="number" class="form-input" id="totalCopies" placeholder="0">
+            </div>
+            <div class="form-group">
+              <label for="availableCopies">Available copies</label>
+              <input type="number" class="form-input" id="availableCopies" placeholder="0">
+            </div>
+            <div class="form-group">
+              <label for="shelfLocation">Shelf location</label>
+              <input type="text" class="form-input" id="shelfLocation" placeholder="e.g. A-01">
+            </div>
+          </div>
+
+          <div class="form-grid">
+            <div class="form-group">
+              <label for="keyStage">Grade level</label>
+              <select class="form-input" id="keyStage">
+                <option value="">Select…</option>
+                <option value="KS 1 - Kinder to Grade 3">KS 1 – Kinder to Grade 3</option>
+                <option value="KS 2 - Grade 4 to Grade 6">KS 2 – Grade 4 to Grade 6</option>
+                <option value="KS 3 - Grade 7 to Grade 10">KS 3 – Grade 7 to Grade 10</option>
+                <option value="KS 4 - Grade 11 to Grade 12">KS 4 – Grade 11 to Grade 12</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="noOfPages">No. of pages</label>
+              <input type="number" class="form-input" id="noOfPages" placeholder="0">
+            </div>
+            <div class="form-group">
+              <label for="createdAt">Created at</label>
+              <input type="date" class="form-input" id="createdAt">
+            </div>
+            <div class="form-group">
+              <label for="lastUpdated">Last updated</label>
+              <input type="date" class="form-input" id="lastUpdated">
+            </div>
+          </div>
+        </form>
+      </div>
+      <div class="lms-modal-footer">
+        <button type="button" class="tbtn" data-bs-dismiss="modal">Cancel</button>
+        <button type="button" class="tbtn tbtn--primary" id="saveBookBtn">Save book</button>
+      </div>
+    </div>
+  </div>
 </div>
 {% endblock %}
 
 {% block extra_scripts %}
-    <script>
-        document.addEventListener("DOMContentLoaded", function () {
-            loadGenres();
-            loadBooks();
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    loadGenres();
+    loadBooks();
+  });
 
-        });
+  async function loadBooks() {
+    try {
+      const res = await fetch('/api/books');
+      const result = await res.json();
+      if (result.error) { console.error(result.error); return; }
+      hot.loadData(result.data);
+    } catch (err) {
+      console.error(err);
+    }
+  }
 
-        async function loadBooks() {
-            try {
-                const res = await fetch('/api/books');
-                const result = await res.json();
+  const container = document.getElementById('booksTable');
 
-                if (result.error) {
-                    console.error(result.error);
-                    return;
-                }
-
-                hot.loadData(result.data); // 🔥 THIS replaces your dummy data
-
-            } catch (err) {
-                console.error(err);
-            }
+  const hot = new Handsontable(container, {
+    colHeaders: [
+      "Book ID", "Accession Start", "Accession End", "ISBN", "Title",
+      "Author", "Illustrator", "Publisher", "Year", "Category",
+      "Total", "Available", "Shelf", "Created", "Updated", "Grade Level", "Pages"
+    ],
+    columns: [
+      { data: 'book_id', readOnly: true },
+      { data: 'accession_no_start', type: 'numeric' },
+      { data: 'accession_no_end', type: 'numeric' },
+      { data: 'isbn' },
+      { data: 'title' },
+      { data: 'author' },
+      { data: 'illustrator' },
+      { data: 'publisher' },
+      { data: 'publication_year', type: 'numeric' },
+      { data: 'category_id', type: 'numeric' },
+      { data: 'total_copies', type: 'numeric' },
+      { data: 'available_copies', type: 'numeric' },
+      { data: 'shelf_location' },
+      { data: 'created_at', type: 'date', dateFormat: 'YYYY-MM-DD' },
+      { data: 'last_updated_at', type: 'date', dateFormat: 'YYYY-MM-DD' },
+      { data: 'key_stage_grade_level' },
+      { data: 'no_of_pages', type: 'numeric' }
+    ],
+    afterChange: async function (changes, source) {
+      if (!changes || source === 'loadData') return;
+      for (const [row, prop, oldVal, newVal] of changes) {
+        if (oldVal === newVal) continue;
+        let bookId = hot.getDataAtRowProp(row, 'book_id');
+        try {
+          if (!bookId && newVal !== null && newVal !== '') {
+            const res = await fetch('/api/books', { method: 'POST' });
+            const result = await res.json();
+            if (result.error) { console.error(result.error); return; }
+            bookId = result.book_id;
+            hot.setDataAtRowProp(row, 'book_id', bookId, 'internal');
+          }
+          if (bookId && prop !== 'book_id') {
+            await fetch(`/api/books/${bookId}`, {
+              method: 'PUT',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ field: prop, value: newVal })
+            });
+          }
+        } catch (err) {
+          console.error(err);
         }
+      }
+    },
+    rowHeaders: true,
+    licenseKey: 'non-commercial-and-evaluation',
+    contextMenu: true,
+    manualColumnResize: true,
+    manualRowResize: true,
+    columnSorting: true,
+    filters: true,
+    dropdownMenu: true,
+    stretchH: 'all',
+    width: '100%',
+    height: '100%',
+    minSpareRows: 1
+  });
 
-        // FOR THE BOOKS TABLE
-        const container = document.getElementById('booksTable');
+  // Genre modal logic
+  const genreModal = document.getElementById('genreOverlayModal');
+  const searchInput = document.getElementById('genreSearch');
+  const addBtn = document.getElementById('addGenreBtn');
+  const tableBody = document.querySelector('#genreTable tbody');
+  let selectedIndex = -1;
 
-        // empty data initalize
-        const data = [
-        ];
+  genreModal.addEventListener('shown.bs.modal', () => {
+    searchInput.focus();
+    setTimeout(() => { selectRow(0); }, 50);
+  });
 
-        const hot = new Handsontable(container, {
-        //data: data,
+  searchInput.addEventListener('input', () => {
+    addBtn.disabled = searchInput.value.trim() === '';
+  });
 
-        colHeaders: [
-            "Book ID",
-            "Accession Start",
-            "Accession End",
-            "ISBN",
-            "Title",
-            "Author",
-            "Illustrator",
-            "Publisher",
-            "Year",
-            "Category",
-            "Total",
-            "Available",
-            "Shelf",
-            "Created",
-            "Updated",
-            "Grade Level",
-            "Pages"
-        ],
+  function selectRow(index) {
+    const rows = tableBody.querySelectorAll('tr');
+    if (!rows.length) { selectedIndex = -1; return; }
+    if (index < 0) index = 0;
+    if (index >= rows.length) index = rows.length - 1;
+    rows.forEach(r => r.classList.remove('selected'));
+    selectedIndex = index;
+    const sel = rows[selectedIndex];
+    if (!sel) return;
+    sel.classList.add('selected');
+    sel.scrollIntoView({ block: 'nearest' });
+  }
 
-        columns: [
-            { data: 'book_id', readOnly: true },
-            { data: 'accession_no_start', type: 'numeric' },
-            { data: 'accession_no_end', type: 'numeric' },
-            { data: 'isbn' },
-            { data: 'title' },
-            { data: 'author' },
-            { data: 'illustrator' },
-            { data: 'publisher' },
-            { data: 'publication_year', type: 'numeric' },
-            /*
-            {
-                data: 'category_id',
+  function capitalizeWords(str) {
+    return str.toLowerCase().trim().split(/\s+/).filter(Boolean)
+      .map(w => w[0].toUpperCase() + w.slice(1)).join(' ');
+  }
 
-                type: 'dropdown',
-                source: function () {
-                    return window.genres.map(g => g.name);
-                },
+  function openAddBookModal() {
+    new bootstrap.Modal(document.getElementById('addBookModal')).show();
+  }
 
-                renderer: function (instance, td, row, col, prop, value) {
-                    const name = window.genreMap[value] || '';
-                    td.innerText = name;
-                    return td;
-                }
-            },*/
-            { data: 'category_id', type: 'numeric'},
-            { data: 'total_copies', type: 'numeric' },
-            { data: 'available_copies', type: 'numeric' },
-            { data: 'shelf_location' },
-            { data: 'created_at', type: 'date', dateFormat: 'YYYY-MM-DD' },
-            { data: 'last_updated_at', type: 'date', dateFormat: 'YYYY-MM-DD' },
-            { data: 'key_stage_grade_level' },
-            { data: 'no_of_pages', type: 'numeric' }
-        ],
-        
-        afterChange: async function (changes, source) {
-            if (!changes || source === 'loadData') return;
+  function openAddGenreModal() {
+    loadGenres();
+    new bootstrap.Modal(document.getElementById('genreOverlayModal')).show();
+  }
 
-            for (const [row, prop, oldVal, newVal] of changes) {
-
-                if (oldVal === newVal) continue;
-
-                let bookId = hot.getDataAtRowProp(row, 'book_id');
-
-                try {
-                    // 🔥 1. CREATE row if needed
-                    if (!bookId && newVal !== null && newVal !== '') {
-
-                        const res = await fetch('/api/books', {
-                            method: 'POST'
-                        });
-
-                        const result = await res.json();
-
-                        if (result.error) {
-                            console.error(result.error);
-                            return;
-                        }
-
-                        bookId = result.book_id;
-
-                        // set ID without retriggering loop
-                        hot.setDataAtRowProp(row, 'book_id', bookId, 'internal');
-                    }
-
-                    // 🔥 2. UPDATE the edited field
-                    if (bookId && prop !== 'book_id') {
-
-                        await fetch(`/api/books/${bookId}`, {
-                            method: 'PUT',
-                            headers: {
-                                'Content-Type': 'application/json'
-                            },
-                            body: JSON.stringify({
-                                field: prop,
-                                value: newVal
-                            })
-                        });
-
-                    }
-
-                } catch (err) {
-                    console.error(err);
-                }
-            }
-        },
-
-        // 🔥 Excel-like features
-        rowHeaders: true,
-
-        // Editing
-        licenseKey: 'non-commercial-and-evaluation',
-        contextMenu: true, // right-click menu
-        manualColumnResize: true,
-        manualRowResize: true,
-
-        // Sorting + filtering
-        columnSorting: true,
-        filters: true,
-        dropdownMenu: true,
-
-        // Navigation
-        stretchH: 'all',
-        width: '100%',
-        height: 500,
-
-        // Auto new row
-        minSpareRows: 1
-        });
-
-        //TODO add filter for punctuations ex. slash and backslash, causes error on deletion
-        // FOR THE GENRE;
-        const genreModal = document.getElementById('genreOverlayModal');
-        const searchInput = document.getElementById('genreSearch');
-        const addBtn = document.getElementById('addGenreBtn');
-        const tableBody = document.querySelector('#genreTable tbody');
-
-        let selectedIndex = -1;
-
-        // Auto-focus search when modal opens
-        genreModal.addEventListener('shown.bs.modal', () => {
-            searchInput.focus();
-
-            setTimeout(() => {
-                selectRow(0);
-            }, 50);
-        });
-
-        // Enable Add button if search input has text
-        searchInput.addEventListener('input', () => {
-            addBtn.disabled = searchInput.value.trim() === '';
-        });
-
-        // Select row helper
-        function selectRow(index) {
-            const rows = tableBody.querySelectorAll('tr');
-
-            if (rows.length === 0) {
-                selectedIndex = -1;
-                return;
-            }
-
-            if (index < 0) index = 0;
-            if (index >= rows.length) index = rows.length - 1;
-
-            rows.forEach(row => row.classList.remove('selected'));
-
-            selectedIndex = index;
-
-            const selectedRow = rows[selectedIndex];
-            if (!selectedRow) return;
-
-            selectedRow.classList.add('selected');
-            selectedRow.scrollIntoView({ block: 'nearest' });
-        }
-
-        function capitalizeWords(str) {
-            return str
-                .toLowerCase()
-                .trim()
-                .split(/\s+/)
-                .filter(Boolean)
-                .map(word => word[0].toUpperCase() + word.slice(1))
-                .join(' ');
-        }
-        
-        // KEYBOARD SHORTCUTS
-        function openAddBookModal() {
-            const modal = new bootstrap.Modal(document.getElementById('addBookModal'));
-            modal.show();
-        }
-
-        function openAddGenreModal() {
-            loadGenres(); // 👈 keep your existing logic
-            const modal = new bootstrap.Modal(document.getElementById('genreOverlayModal'));
-            modal.show();
-        }
-
-        document.addEventListener('keydown', function (e) {
-            const tag = document.activeElement.tagName;
-
-            if (tag === 'INPUT' || tag === 'TEXTAREA') return;
-
-            if (e.ctrlKey && e.key === '1') {
-                e.preventDefault();
-                openAddBookModal();
-            }
-
-            if (e.ctrlKey && e.key === '2') {
-                e.preventDefault();
-                openAddGenreModal();
-            }
-        });
-        
-    
-
-    </script>
-
-    <script src="{{ url_for('static', filename='js/genreCRUD.js') }}"></script>
-    
+  document.addEventListener('keydown', function (e) {
+    const tag = document.activeElement.tagName;
+    if (tag === 'INPUT' || tag === 'TEXTAREA') return;
+    if (e.ctrlKey && e.key === '1') { e.preventDefault(); openAddBookModal(); }
+    if (e.ctrlKey && e.key === '2') { e.preventDefault(); openAddGenreModal(); }
+  });
+</script>
+<script src="{{ url_for('static', filename='js/genreCRUD.js') }}"></script>
 {% endblock %}

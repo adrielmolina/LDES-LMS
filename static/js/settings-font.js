@@ -35,9 +35,9 @@ class FontManager {
 
     applyFontSize(size) {
         const sizeMap = {
-            'small': '14px',
+            'small': '12px',
             'medium': '16px',
-            'large': '18px'
+            'large': '20px'
         };
         
         document.body.style.fontSize = sizeMap[size] || sizeMap['medium'];
