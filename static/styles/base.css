@@ -297,25 +297,31 @@ body {
    Handsontable overrides
    (always light, Excel-like)
    ========================= */
+/* ===== BASE (LIGHT / EXCEL-LIKE) ===== */
+
 .handsontable,
 .ht_master,
 .ht_master .wtHolder,
-.ht_master .wtHider {
-  background: #ffffff !important;
-  color: #000 !important;
-  font-family: Calibri, Arial, sans-serif;
+.ht_master .wtHider,
+.handsontable td,
+.handsontable textarea.handsontableInput,
+.handsontableInput,
+.handsontableInputHolder,
+.htMenu,
+.htFiltersConditionsMenu,
+.htUISelect,
+.htDropdownMenu {
+    background: #ffffff !important;
+    color: #000000 !important;
+    font-family: Calibri, Arial, sans-serif;
 }
 
-.handsontable td {
-  background: #ffffff !important;
-  color: #000 !important;
-}
-
+/* ===== HEADERS ===== */
 .handsontable th {
-  background: #f3f3f3 !important;
-  color: #000 !important;
-  font-weight: 600;
-  border-color: #d0d0d0 !important;
+    background: #f3f3f3 !important;
+    color: #000000 !important;
+    font-weight: 600;
+    border-color: #d0d0d0 !important;
 }
 
 .handsontable td,
@@ -323,49 +329,108 @@ body {
   border-color: #dcdcdc !important;
 }
 
-.handsontable .htDimmed,
-.handsontable .htReadOnly {
-  background: #f5f5f5 !important;
-  color: #666 !important;
+/* ===== READONLY ===== */
+.handsontable td.htDimmed,
+.handsontable td[class*="htDimmed"] {
+    background: #d3d3d3 !important;
+    color: #000000 !important;
 }
 
-.handsontable .current {
-  outline: 2px solid #217346 !important;
+/* ===== ACTIVE CELL / EDIT FIX ===== */
+.handsontable td.area.current,
+.handsontable .wtBorder.current {
+    background: #ffffff !important;
 }
 
-.htMenu,
-.htFiltersConditionsMenu,
+/* ===== FILTER / DROPDOWN UI ===== */
 .htUISelect,
-.htDropdownMenu {
-  background: #ffffff !important;
-  color: #000 !important;
-  border: 1px solid #ccc !important;
+.htUISelect .htUISelectCaption,
+.htUISelect .htFiltersMenuCondition,
+.htFiltersConditionsMenu {
+    background: #ffffff !important;
+    color: #000000 !important;
 }
 
 .htMenu input,
 .htFiltersConditionsMenu input,
 .htUISelect input {
-  background: #ffffff !important;
-  color: #000 !important;
-  border: 1px solid #ccc !important;
+    background: #ffffff !important;
+    color: #000000 !important;
+    border: 1px solid #ccc !important;
 }
 
+/* ===== BUTTONS ===== */
 .htMenu button {
-  background: #f3f3f3 !important;
-  color: #000 !important;
-  border: 1px solid #ccc !important;
+    background: #f3f3f3 !important;
+    color: #000000 !important;
+    border: 1px solid #ccc !important;
 }
 
 .htMenu button:hover {
   background: #e2e2e2 !important;
 }
 
+/* Default active (will be overridden below) */
 .htMenu button.htItemWrapperActive {
-  background: #217346 !important;
-  color: #fff !important;
-  border-color: #217346 !important;
+    background: #217346 !important;
+    color: #ffffff !important;
 }
 
-.ht_master .wtHolder {
-  background: #ffffff !important;
+/* ===== SCROLLBAR ===== */
+.ht_master ::-webkit-scrollbar {
+    background: #f1f1f1;
+}
+.ht_master ::-webkit-scrollbar-thumb {
+    background: #c1c1c1;
+}
+
+
+/* ===================================================== */
+/* ===== EXCEL GREEN THEME (ONLY booksTable) ===== */
+/* ===================================================== */
+
+#booksTable .handsontable th,
+#booksTable .handsontable .rowHeader,
+#booksTable .handsontable th.ht__highlight {
+    background: #426753 !important;
+    color: #ffffff !important;
+    border-color: #1a5c38 !important;
+}
+
+#booksTable .handsontable th.ht__active_highlight {
+    background: #1a5c38 !important;
+}
+
+/* Selection + borders */
+.handsontable .wtBorder.current,
+.handsontable .wtBorder.area,
+.handsontable .wtBorder.fill {
+    background: #217346 !important;
+}
+
+/* Selection highlight */
+#booksTable .handsontable td.area {
+    background: rgba(33, 115, 70, 0.15) !important;
+}
+
+/* Filter dropdown arrow */
+#booksTable .handsontable .changeType {
+  background: #a6a6a6 !important;  
+  color: #000000 !important;
+}
+
+/* Filter OK button */
+.htMenu button.htUIButtonOK {
+    background: #217346 !important;
+    color: #ffffff !important;
+    border-color: #217346 !important;
+}
+
+.htMenu button.htUIButtonOK:hover {
+    background: #1a5c38 !important;
+}
+
+/* Checkbox accent */
+.htUICheckbox input[type="checkbox"]:checked {
+    accent-color: #217346;
 }

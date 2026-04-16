@@ -195,89 +195,77 @@ def get_books():
     finally:
         conn.close()
 
-
+        
 @server.route("/api/books", methods=["POST"])
 def create_book():
     conn = db_conn.conn_init()
     cursor = conn.cursor()
-
     try:
-        # insert minimal/default row
+        today = date.today().isoformat()  # 👈 added
         cursor.execute("""
-            INSERT INTO books DEFAULT VALUES
-        """)
-        '''cursor.execute("""
-            INSERT INTO books (
-                accession_no_start,
-                accession_no_end,
-                isbn,
-                title,
-                author,
-                illustrator,
-                publisher,
-                publication_year,
-                category_id,
-                total_copies,
-                available_copies,
-                shelf_location,
-                created_at,
-                last_updated_at,
-                key_stage_grade_level,
-                no_of_pages
-            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-        """, (
-            0, 0, "TEMP", "TEMP", "TEMP", "TEMP", "TEMP",
-            2000, 1, 0, 0, "TEMP",
-            date.today(),
-            date.today(),
-            "KS 1 - Kinder to Grade 3",
-            0
-        ))'''
-
+            INSERT INTO books (created_at, last_updated_at) VALUES (?, ?)
+        """, (today, today))  # 👈 changed from DEFAULT VALUES
         conn.commit()
-
         book_id = cursor.lastrowid
-
         return jsonify({
             "success": True,
             "book_id": book_id
         })
-
     except Exception as e:
         print("DB ERROR:", e)
         return jsonify({"error": str(e)}), 500
-    
     finally:
         conn.close()
 
 
 @server.route("/api/books/<int:book_id>", methods=["PUT"])
 def update_book(book_id):
-    from flask import request, jsonify
-
     data = request.get_json()
     field = data.get("field")
     value = data.get("value")
-
     if not field:
         return jsonify({"error": "Field required"}), 400
 
+    allowed_fields = [  # 👈 added whitelist
+        'accession_no_start', 'accession_no_end', 'isbn', 'title', 'author',
+        'illustrator', 'publisher', 'publication_year', 'category_id',
+        'total_copies', 'available_copies', 'shelf_location',
+        'key_stage_grade_level', 'no_of_pages'
+    ]
+    if field not in allowed_fields:  # 👈 added
+        return jsonify({"error": "Invalid field"}), 400
+
     conn = db_conn.conn_init()
     cursor = conn.cursor()
-
     try:
-        query = f"UPDATE books SET {field} = ? WHERE book_id = ?"
-        cursor.execute(query, (value, book_id))
+        today = date.today().isoformat()  # 👈 added
+        query = f"UPDATE books SET {field} = ?, last_updated_at = ? WHERE book_id = ?"  # 👈 changed
+        cursor.execute(query, (value, today, book_id))  # 👈 changed
         conn.commit()
-
         return jsonify({"success": True})
-
     except Exception as e:
         print("DB ERROR:", e)
         return jsonify({"error": str(e)}), 500
-
     finally:
         conn.close()
+
+
+@server.route("/api/books/<int:book_id>", methods=["DELETE"])
+def delete_book(book_id):
+    conn = db_conn.conn_init()
+    cursor = conn.cursor()
+    try:
+        print("Deleting book with ID:", book_id)
+        cursor.execute("DELETE FROM books WHERE book_id = ?", (book_id,))
+        conn.commit()
+        return jsonify({"success": True})
+    except Exception as e:
+        print("DB ERROR:", e)
+        return jsonify({"error": str(e)}), 500
+    finally:
+        conn.close()
+
+
 
 #? -------------------- END -------------------- ?#
 

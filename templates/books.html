@@ -24,12 +24,26 @@
         <span class="tbtn-kbd">Ctrl+2</span>
       </button>
     </div>
+<<<<<<< HEAD
     <div class="search-wrap">
       <svg class="search-icon" viewBox="0 0 24 24" fill="none">
         <circle cx="11" cy="11" r="7" stroke="currentColor" stroke-width="1.5"/>
         <path d="M20 20L16.65 16.65" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
       </svg>
       <input type="text" id="searchInput" class="search-input" placeholder="Search books…">
+=======
+
+    <div id="buttons_container" class="buttons_container">
+        <div class="button-group-left">
+            <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addBookModal">Add Book (Ctrl + 1)</button>
+            <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#genreOverlayModal" onclick="loadGenres()">Add Genre (Ctrl + 2)</button>
+        </div>
+        <div class="search-wrapper">
+            <span class="search-icon">🔍</span>
+                <input type="text" id="searchTable" class="form-control search-input" placeholder="Search books...">
+                <button id="clearSearchInput">×</button>
+        </div>
+>>>>>>> ba5f06854c1b58208c81bbff33e840bf7c770b00
     </div>
   </div>
 
@@ -195,6 +209,7 @@
 {% endblock %}
 
 {% block extra_scripts %}
+<<<<<<< HEAD
 <script>
   document.addEventListener("DOMContentLoaded", function () {
     loadGenres();
@@ -277,6 +292,34 @@
     height: '100%',
     minSpareRows: 1
   });
+=======
+    <script src="{{ url_for('static', filename='js/genreCRUD.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/searchBar.js') }}"></script>
+    <script>
+        document.addEventListener("DOMContentLoaded", async function () {
+            await loadGenres();
+            loadBooks();
+
+        });
+        
+        //overwritten in the seachbar.js, but keeping this here for reference
+        /*async function loadBooks() {
+            try {
+                const res = await fetch('/api/books');
+                const result = await res.json();
+
+                if (result.error) {
+                    console.error(result.error);
+                    return;
+                }
+
+                hot.loadData(result.data); // 🔥 THIS replaces your dummy data
+
+            } catch (err) {
+                console.error(err);
+            }
+        }*/
+>>>>>>> ba5f06854c1b58208c81bbff33e840bf7c770b00
 
   // Genre modal logic
   const genreModal = document.getElementById('genreOverlayModal');
@@ -307,6 +350,7 @@
     sel.scrollIntoView({ block: 'nearest' });
   }
 
+<<<<<<< HEAD
   function capitalizeWords(str) {
     return str.toLowerCase().trim().split(/\s+/).filter(Boolean)
       .map(w => w[0].toUpperCase() + w.slice(1)).join(' ');
@@ -329,4 +373,288 @@
   });
 </script>
 <script src="{{ url_for('static', filename='js/genreCRUD.js') }}"></script>
+=======
+        columns: [
+            { data: 'book_id', readOnly: true },
+            { data: 'accession_no_start', type: 'numeric' },
+            { data: 'accession_no_end', type: 'numeric' },
+            { data: 'isbn' },
+            { data: 'title' },
+            { data: 'author' },
+            { data: 'illustrator' },
+            { data: 'publisher' },
+            { data: 'publication_year', type: 'numeric' },
+            
+            {
+                data: 'category_id',
+                type: 'dropdown',
+                source: [],
+                renderer: function (instance, td, row, col, prop, value) {
+                    console.log('RENDERER value:', value, typeof value, 'genreMap:', JSON.stringify(window.genreMap));
+                    const name = window.genreMap?.[Number(value)] || null;
+                    if (!name && value) {
+                        td.innerText = `Unknown (ID: ${value})`;
+                        td.style.color = 'red';
+                    } else {
+                        td.innerText = name || '';
+                        td.style.color = '';  // 👈 don't forget this reset
+                    }
+                    return td;
+                }
+            },
+            //{ data: 'category_id', type: 'numeric'},
+            { data: 'total_copies', type: 'numeric' },
+            { data: 'available_copies', type: 'numeric' },
+            { data: 'shelf_location' },
+            { data: 'created_at', type: 'date', dateFormat: 'YYYY-MM-DD' , readOnly: true},
+            { data: 'last_updated_at', type: 'date', dateFormat: 'YYYY-MM-DD' , readOnly: true},
+            //{ data: 'key_stage_grade_level' },
+            {
+                data: 'key_stage_grade_level',
+                type: 'dropdown',
+                source: [
+                    "KS 1 - Kinder to Grade 3",
+                    "KS 1 & 2 - Kinder to Grade 6",
+                    "KS 2 - Grade 4 to 6",
+                    "KS 4 - Grade 11 to 12",
+                    "KS 3 & 4 - Grade 7 to 12",
+                    "KS 3 - Grade 7 to 10",
+                    "Kinder to Grade 1",
+                    "KS 2 & 3 - Grade 4 to 10",
+                    "KS 1 - Kinder at Grade 3"
+                ],
+                strict: true,
+                allowInvalid: false
+            },
+            { data: 'no_of_pages', type: 'numeric' }
+        ],
+        
+        afterChange: function (changes, source) {
+            
+            if (!changes || source === 'loadData' || source === 'internal') return;
+
+            changes.forEach(([row, prop, oldVal, newVal]) => {
+                if (oldVal === newVal) return;
+
+                let valueToSave = newVal;
+                if (prop === 'category_id' && window.genreReverseMap?.[newVal]) {
+                    valueToSave = window.genreReverseMap[newVal];
+                    console.log('newVal:', newVal, 'valueToSave:', valueToSave); // 👈 inside forEach
+                    // 👇 add this line here
+                    hot.setDataAtRowProp(row, 'category_id', valueToSave, 'internal');
+                    //hot.getSourceData()[row][prop] = valueToSave;
+                    //hot.render();
+
+                }
+
+                let bookId = hot.getDataAtRowProp(row, 'book_id');
+
+                if (!bookId) {
+                    fetch('/api/books', { method: 'POST' })
+                        .then(r => r.json())
+                        .then(result => {
+                            if (result.error) { console.error(result.error); return; }
+                            hot.setDataAtRowProp(row, 'book_id', result.book_id, 'internal');
+                            // 👇 set created_at and last_updated_at on new row
+                            const today = new Date().toISOString().split('T')[0];
+                            hot.setDataAtRowProp(row, 'created_at', today, 'internal');
+                            hot.setDataAtRowProp(row, 'last_updated_at', today, 'internal');
+                            return saveField(result.book_id, prop, valueToSave);
+                        })
+                        .catch(console.error);
+                } else {
+                    saveField(bookId, prop, valueToSave);
+                }
+            });
+        },
+
+        contextMenu: {
+            items: {
+                'copy': {},
+                'cut': {},
+                'separator1': Handsontable.plugins.ContextMenu.SEPARATOR,
+                'delete_row_custom': {
+                    name: 'Remove row',
+                    callback: function(key, selection) {
+                        const row = selection[0].start.row;
+                        const bookId = hot.getDataAtRowProp(row, 'book_id');
+
+                        if (!bookId) {
+                            hot.alter('remove_row', row);
+                            return;
+                        }
+
+                        if (!confirm(`Delete book ID ${bookId}? This cannot be undone.`)) return;
+
+                        fetch(`/api/books/${bookId}`, { method: 'DELETE' })
+                            .then(r => r.json())
+                            .then(result => {
+                                if (result.error) {
+                                    alert('Failed to delete: ' + result.error);
+                                    return;
+                                }
+                                hot.alter('remove_row', row);
+                            })
+                            .catch(err => {
+                                console.error(err);
+                                alert('Something went wrong.');
+                            });
+                    }
+                }
+            }
+        },
+
+        //allow only digits for certain columns 
+        beforeKeyDown: function(e) {
+            const selected = this.getSelectedLast();
+            if (!selected) return;
+
+            const col = selected[1];
+            const numericCols = [1, 2, 3, 8, 10, 11, 16]; // accession_start, accession_end, isbn, year, total, available, pages
+
+            if (numericCols.includes(col)) {
+                const allowed = ['Backspace', 'Delete', 'ArrowLeft', 'ArrowRight', 'Tab', 'Enter'];
+                if (!allowed.includes(e.key) && !/^\d$/.test(e.key)) {
+                    e.stopImmediatePropagation();
+                    e.preventDefault();
+                }
+            }
+        },
+
+        // 🔥 Excel-like features
+        rowHeaders: true,
+
+        // Editing
+        licenseKey: 'non-commercial-and-evaluation',
+        //contextMenu: true, // overwritten above 
+        manualColumnResize: true,
+        manualRowResize: true,
+
+        // Sorting + filtering
+        columnSorting: true,
+        filters: true,
+        dropdownMenu: true,
+
+        // Navigation
+        stretchH: 'all',
+        width: '100%',
+        height: 500,
+
+        // Auto new row
+        minSpareRows: 1
+
+        });
+
+        function saveField(bookId, prop, value) {
+            if (prop === 'book_id') return;
+            return fetch(`/api/books/${bookId}`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ field: prop, value: value })
+            })
+            .then(r => r.json())
+            .then(result => {
+                if (result.error) { console.error(result.error); return; }
+                // 👇 update last_updated_at in the table
+                const today = new Date().toISOString().split('T')[0];
+                const rowIndex = hot.getSourceData().findIndex(r => r.book_id === bookId);
+                if (rowIndex !== -1) {
+                    hot.setDataAtRowProp(rowIndex, 'last_updated_at', today, 'internal');
+                }
+            })
+            .catch(console.error);
+        }
+
+        //TODO add filter for punctuations ex. slash and backslash, causes error on deletion
+        // FOR THE GENRE;
+        const genreModal = document.getElementById('genreOverlayModal');
+        const searchInput = document.getElementById('genreSearch');
+        const addBtn = document.getElementById('addGenreBtn');
+        const tableBody = document.querySelector('#genreTable tbody');
+
+        let selectedIndex = -1;
+
+        // Auto-focus search when modal opens
+        genreModal.addEventListener('shown.bs.modal', () => {
+            searchInput.focus();
+
+            setTimeout(() => {
+                selectRow(0);
+            }, 50);
+        });
+
+        // Enable Add button if search input has text
+        searchInput.addEventListener('input', () => {
+            addBtn.disabled = searchInput.value.trim() === '';
+        });
+
+        // Select row helper
+        function selectRow(index) {
+            const rows = tableBody.querySelectorAll('tr');
+
+            if (rows.length === 0) {
+                selectedIndex = -1;
+                return;
+            }
+
+            if (index < 0) index = 0;
+            if (index >= rows.length) index = rows.length - 1;
+
+            rows.forEach(row => row.classList.remove('selected'));
+
+            selectedIndex = index;
+
+            const selectedRow = rows[selectedIndex];
+            if (!selectedRow) return;
+
+            selectedRow.classList.add('selected');
+            selectedRow.scrollIntoView({ block: 'nearest' });
+        }
+
+        function capitalizeWords(str) {
+            return str
+                .toLowerCase()
+                .trim()
+                .split(/\s+/)
+                .filter(Boolean)
+                .map(word => word[0].toUpperCase() + word.slice(1))
+                .join(' ');
+        }
+        
+        // KEYBOARD SHORTCUTS
+        function openAddBookModal() {
+            const modal = new bootstrap.Modal(document.getElementById('addBookModal'));
+            modal.show();
+        }
+
+        function openAddGenreModal() {
+            loadGenres(); // 👈 keep your existing logic
+            const modal = new bootstrap.Modal(document.getElementById('genreOverlayModal'));
+            modal.show();
+        }
+
+        document.addEventListener('keydown', function (e) {
+            const tag = document.activeElement.tagName;
+
+            if (tag === 'INPUT' || tag === 'TEXTAREA') return;
+
+            if (e.ctrlKey && e.key === '1') {
+                e.preventDefault();
+                openAddBookModal();
+            }
+
+            if (e.ctrlKey && e.key === '2') {
+                e.preventDefault();
+                openAddGenreModal();
+            }
+        });
+        
+        document.getElementById('clearSearchInput').addEventListener('click', function() {
+            const searchInput = document.getElementById('searchTable');
+            searchInput.value = '';
+            searchInput.dispatchEvent(new Event('input')); // trigger the input event to refresh the table
+        });
+
+    </script>
+>>>>>>> ba5f06854c1b58208c81bbff33e840bf7c770b00
 {% endblock %}

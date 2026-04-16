@@ -1,11 +1,34 @@
-/*
+document.addEventListener('DOMContentLoaded', () => {
+    const searchInput = document.getElementById('genreSearch');
+    const addBtn = document.getElementById('addGenreBtn');
+
+    if (!searchInput || !addBtn) {
+        console.error('Genre elements not found');
+        return;
+    }
+
+    addBtn.addEventListener('click', addGenre);
+
+    searchInput.addEventListener('keydown', e => {
+        if (e.key === 'Enter') {
+            e.preventDefault();
+            addGenre();
+        }
+    });
+});
+
+
+
 // 👇 ADD THESE GLOBALS (top of your JS file ideally)
 window.genres = [];
 window.genreMap = {};
 window.genreReverseMap = {};
-*/
+
 //TODO temporarily removed fix later
 
+
+// old version of loadgenres
+/*
 async function loadGenres() {
     const tbody = document.querySelector('#genreTable tbody');
 
@@ -16,7 +39,7 @@ async function loadGenres() {
         const res = await fetch('/api/categories');
         const result = await res.json();
 
-        /*
+        
         // 🔥 ADD THIS BLOCK
         window.genres = result.data;
         window.genreMap = {};
@@ -26,7 +49,7 @@ async function loadGenres() {
             window.genreMap[g.category_id] = g.name;
             window.genreReverseMap[g.name] = g.category_id;
         });
-        */
+        
         // 👇 clear loading
         tbody.innerHTML = "";
 
@@ -48,6 +71,53 @@ async function loadGenres() {
         console.error(err);
 
         // 👇 show error state
+        tbody.innerHTML = "<tr><td colspan='2'>Failed to load</td></tr>";
+    }
+}
+    
+*/
+
+async function loadGenres() {
+    const tbody = document.querySelector('#genreTable tbody');
+    tbody.innerHTML = "<tr><td colspan='2'>Loading...</td></tr>";
+
+    try {
+        const res = await fetch('/api/categories');
+        const result = await res.json();
+
+        // 👇 only clear and repopulate AFTER fetch succeeds
+        window.genres = result.data;
+        window.genreMap = {};
+        window.genreReverseMap = {};
+
+        result.data.forEach(g => {
+            window.genreMap[g.category_id] = g.name;
+            window.genreReverseMap[g.name] = g.category_id;
+        });
+
+        // 👇 only once
+        hot.updateSettings({
+            columns: hot.getSettings().columns.map(c => {
+                if (c.data !== 'category_id') return c;
+                return { ...c, source: window.genres.map(g => g.name) };
+            })
+        });
+
+        tbody.innerHTML = "";
+        result.data.forEach(genre => {
+            const row = document.createElement('tr');
+            row.innerHTML = `
+                <td>${genre.name}</td>
+                <td>
+                    <button class="btn btn-sm btn-warning" onclick="editGenre(${genre.category_id}, \`${genre.name}\`)">Edit</button>
+                    <button class="btn btn-sm btn-danger" onclick="deleteGenre(${genre.category_id}, \`${genre.name}\`)">Delete</button>
+                </td>
+            `;
+            tbody.appendChild(row);
+        });
+
+    } catch (err) {
+        console.error(err);
         tbody.innerHTML = "<tr><td colspan='2'>Failed to load</td></tr>";
     }
 }
@@ -88,16 +158,6 @@ async function addGenre() {
         console.error(err);
     }
 }
-
-//BIND THE FUNCTIONS TO THE MOUSE CLICK AND BUTTON PRESS
-document.getElementById('addGenreBtn').addEventListener('click', addGenre);
-
-searchInput.addEventListener('keydown', e => {
-    if (e.key === 'Enter') {
-        e.preventDefault();
-        addGenre();
-    }
-});
 
 
 // 🔹 Edit selected
