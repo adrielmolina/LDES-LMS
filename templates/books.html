@@ -24,14 +24,12 @@
         <span class="tbtn-kbd">Ctrl+2</span>
       </button>
     </div>
-<<<<<<< HEAD
     <div class="search-wrap">
       <svg class="search-icon" viewBox="0 0 24 24" fill="none">
         <circle cx="11" cy="11" r="7" stroke="currentColor" stroke-width="1.5"/>
         <path d="M20 20L16.65 16.65" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
       </svg>
       <input type="text" id="searchInput" class="search-input" placeholder="Search books…">
-=======
 
     <div id="buttons_container" class="buttons_container">
         <div class="button-group-left">
@@ -43,7 +41,6 @@
                 <input type="text" id="searchTable" class="form-control search-input" placeholder="Search books...">
                 <button id="clearSearchInput">×</button>
         </div>
->>>>>>> ba5f06854c1b58208c81bbff33e840bf7c770b00
     </div>
   </div>
 
@@ -128,6 +125,10 @@
             <div class="form-group">
               <label for="isbn">ISBN</label>
               <input type="text" class="form-input" id="isbn" placeholder="978-…">
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary" id="saveBookBtn">Save Book</button>
+                <!-- TODO disable when empty -->
             </div>
             <div class="form-group">
               <label for="title">Title</label>
@@ -209,7 +210,6 @@
 {% endblock %}
 
 {% block extra_scripts %}
-<<<<<<< HEAD
 <script>
   document.addEventListener("DOMContentLoaded", function () {
     loadGenres();
@@ -292,7 +292,6 @@
     height: '100%',
     minSpareRows: 1
   });
-=======
     <script src="{{ url_for('static', filename='js/genreCRUD.js') }}"></script>
     <script src="{{ url_for('static', filename='js/searchBar.js') }}"></script>
     <script>
@@ -319,7 +318,6 @@
                 console.error(err);
             }
         }*/
->>>>>>> ba5f06854c1b58208c81bbff33e840bf7c770b00
 
   // Genre modal logic
   const genreModal = document.getElementById('genreOverlayModal');
@@ -350,7 +348,6 @@
     sel.scrollIntoView({ block: 'nearest' });
   }
 
-<<<<<<< HEAD
   function capitalizeWords(str) {
     return str.toLowerCase().trim().split(/\s+/).filter(Boolean)
       .map(w => w[0].toUpperCase() + w.slice(1)).join(' ');
@@ -373,7 +370,6 @@
   });
 </script>
 <script src="{{ url_for('static', filename='js/genreCRUD.js') }}"></script>
-=======
         columns: [
             { data: 'book_id', readOnly: true },
             { data: 'accession_no_start', type: 'numeric' },
@@ -655,6 +651,38 @@
             searchInput.dispatchEvent(new Event('input')); // trigger the input event to refresh the table
         });
 
+        <!-- TODO finish next week -->
+        function collectBookFormData() {
+            return {
+                accession_start: document.getElementById('accessionStart').value.trim(),
+                accession_end: document.getElementById('accessionEnd').value.trim(),
+                isbn: document.getElementById('isbn').value.trim(),
+                title: document.getElementById('title').value.trim(),
+
+                author: document.getElementById('author').value.trim(),
+                illustrator: document.getElementById('illustrator').value.trim(),
+                publisher: document.getElementById('publisher').value.trim(),
+                publication_year: document.getElementById('publicationYear').value.trim(),
+
+                category_id: document.getElementById('categoryId').value.trim(),
+                total_copies: document.getElementById('totalCopies').value,
+                available_copies: document.getElementById('availableCopies').value,
+                shelf_location: document.getElementById('shelfLocation').value.trim(),
+
+                key_stage_grade_level: document.getElementById('keyStage').value,
+                no_of_pages: document.getElementById('noOfPages').value,
+
+                created_at: document.getElementById('createdAt').value,
+                last_updated_at: document.getElementById('lastUpdated').value
+            };
+        }
+        document.getElementById('saveBookBtn').addEventListener('click', () => {
+            const bookData = collectBookFormData();
+
+            console.log(bookData); // 👈 for now
+
+            // later: send to API
+        });
+
     </script>
->>>>>>> ba5f06854c1b58208c81bbff33e840bf7c770b00
 {% endblock %}
