@@ -1,367 +1,371 @@
 /* =========================
-   🌞 Default Theme (Light)
+   Light Theme (default)
    ========================= */
 :root {
-  --bg-body: #f4f5f7;
-  --bg-sidebar: #2b1e1a;
-  --bg-hover: #e8e1da;
-  --bg-calendar: #efe7de;
-  --bg-form: #ffffff;
+  --bg-body:       #f0ece8;
+  --bg-sidebar:    #2b1e1a;
+  --bg-hover:      rgba(255, 255, 255, 0.07);
+  --bg-form:       #ffffff;
+  --bg-surface:    #f8f5f2;
 
-  --text-primary: #2a1f1b;
-  --text-inverse: #ffffff;
+  --text-primary:  #2a1f1b;
+  --text-secondary:#6b5c55;
+  --text-inverse:  #ffffff;
 
-  --accent: #7a4b3a;
+  --accent:        #7a4b3a;
   --accent-strong: #5c372a;
+  --accent-muted:  rgba(122, 75, 58, 0.12);
 
-  --icon-color: #aa7663;
+  --icon-color:    #aa7663;
 
-  --border-subtle: #e2d9cf;
+  --border:        #e2d9cf;
+  --border-strong: #c9bdb5;
 
-  --status-success: #4caf50;
-  --status-warning: #f4a261;
-  --status-error: #e63946;
+  --status-success: #3b6d11;
+  --status-success-bg: #eaf3de;
+  --status-warning: #854f0b;
+  --status-warning-bg: #faeeda;
+  --status-error:   #a32d2d;
+  --status-error-bg:#fcebeb;
+  --status-info:    #185fa5;
+  --status-info-bg: #e6f1fb;
+
+  --radius-sm: 6px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
+
+  --sidebar-width-collapsed: 64px;
+  --sidebar-width-expanded:  240px;
+  --topbar-height: 56px;
 }
 
-
 /* =========================
-   🌙 Dark Mode Overrides
+   Dark Theme
    ========================= */
 .dark-mode {
-  --bg-body: #121212;
-  --bg-sidebar: #1e1e1e;
-  --bg-hover: #2a2a2a;
-  --bg-calendar: #1a1a1a;
-  --bg-form: #1e1e1e;
+  --bg-body:       #121212;
+  --bg-sidebar:    #1a1a1a;
+  --bg-hover:      rgba(255, 255, 255, 0.06);
+  --bg-form:       #1e1e1e;
+  --bg-surface:    #242424;
 
-  --text-primary: #e8e6e3;
-  --text-inverse: #ffffff;
+  --text-primary:  #e8e4e0;
+  --text-secondary:#9e9087;
+  --text-inverse:  #ffffff;
 
-  --accent: #c08a6e;
+  --accent:        #c08a6e;
   --accent-strong: #a06b50;
+  --accent-muted:  rgba(192, 138, 110, 0.12);
 
-  --icon-color: #c08a6e;
+  --icon-color:    #c08a6e;
 
-  --border-subtle: #2c2c2c;
+  --border:        #2e2e2e;
+  --border-strong: #3d3d3d;
 
   --status-success: #66bb6a;
+  --status-success-bg: rgba(102,187,106,0.12);
   --status-warning: #f6bd60;
-  --status-error: #ef5350;
+  --status-warning-bg: rgba(246,189,96,0.12);
+  --status-error:   #ef5350;
+  --status-error-bg: rgba(239,83,80,0.12);
+  --status-info:    #5ba3e0;
+  --status-info-bg: rgba(91,163,224,0.12);
 }
 
 /* =========================
-   🌍 Global Styles
+   Global Reset & Base
    ========================= */
+*, *::before, *::after {
+  box-sizing: border-box;
+}
+
 body {
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
   background-color: var(--bg-body);
   color: var(--text-primary);
+  margin: 0;
+  padding: 0;
+  display: flex;
+  height: 100vh;
+  overflow: hidden;
   transition: background-color 0.3s ease, color 0.3s ease;
 }
 
 /* =========================
-   📦 Layout
-   ========================= */
-.content {
-  margin-left: 70px;
-}
-
-/* =========================
-   📌 Sidebar
+   Sidebar
    ========================= */
 .sidebar {
   position: fixed;
   top: 0;
   left: 0;
-  height: 100%;
-  width: 70px;
+  height: 100vh;
+  width: var(--sidebar-width-collapsed);
+  background: var(--bg-sidebar);
   display: flex;
   flex-direction: column;
-  overflow-x: hidden;
-
-  background: var(--bg-sidebar);
-  padding: 25px 0 25px 15px;
-
-  transition: all 0.4s ease;
-  z-index: 1000;
+  overflow: hidden;
+  transition: width 0.35s ease;
+  z-index: 100;
+  flex-shrink: 0;
 }
 
 .sidebar:hover {
-  width: 260px;
+  width: var(--sidebar-width-expanded);
 }
 
-/* =========================
-   🧾 Header
-   ========================= */
-.sidebar .sidebar-header {
+/* Logo */
+.sidebar-logo {
   display: flex;
   align-items: center;
-  padding-left: 5px;
+  gap: 12px;
+  padding: 18px 16px 18px;
+  border-bottom: 0.5px solid rgba(255, 255, 255, 0.08);
+  margin-bottom: 8px;
+  flex-shrink: 0;
 }
 
-.sidebar .sidebar-header img {
-  width: 42px;
-  border-radius: 50%;
+.sidebar-logo-mark {
+  width: 32px;
+  height: 32px;
+  border-radius: var(--radius-md);
+  background: var(--accent);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  color: white;
 }
 
-.sidebar .sidebar-header h2 {
-  color: var(--text-inverse);
-  font-size: 1.5rem;
+.sidebar-logo-mark svg {
+  width: 16px;
+  height: 16px;
+}
+
+.sidebar-logo-text {
+  font-size: 15px;
   font-weight: 600;
+  color: var(--text-inverse);
   white-space: nowrap;
-  margin-left: 15px;
-}
-
-/* =========================
-   📋 Section Titles
-   ========================= */
-.sidebar-links h4 {
-  color: var(--accent);
-  font-weight: 500;
-  white-space: nowrap;
-  margin: 10px 0;
-  position: relative;
-  padding-left: 15px;
-}
-
-.sidebar-links h4 span {
   opacity: 0;
+  transition: opacity 0.2s ease 0.1s;
 }
 
-.sidebar:hover .sidebar-links h4 span {
+.sidebar:hover .sidebar-logo-text {
   opacity: 1;
 }
 
-/* Separator */
-.sidebar-links .menu-separator {
-  position: absolute;
-  left: 0;
-  top: 50%;
-  width: 100%;
-  height: 1px;
-
-  transform: translateY(-50%) scaleX(1);
-  transform-origin: right;
-
-  background: var(--accent);
-  transition: 0.3s;
-}
-
-.sidebar:hover .menu-separator {
-  transform: translateY(-50%) scaleX(0);
-}
-
-/* =========================
-   🔗 Links
-   ========================= */
-.sidebar-links {
+/* Nav list */
+.sidebar-nav {
   list-style: none;
-  margin-top: 20px;
-  height: 80%;
+  margin: 0;
+  padding: 0 0 8px;
+  flex: 1;
   overflow-y: auto;
   scrollbar-width: none;
 }
 
-.sidebar-links::-webkit-scrollbar {
+.sidebar-nav::-webkit-scrollbar {
   display: none;
 }
 
-.sidebar-links li a {
+/* Bottom pinned area (settings) */
+.sidebar-bottom {
+  border-top: 0.5px solid rgba(255, 255, 255, 0.08);
+  padding-top: 4px;
+  flex-shrink: 0;
+}
+
+/* Links */
+.sidebar-link {
   display: flex;
   align-items: center;
-  gap: 15px;
-
-  color: var(--text-inverse);
-  font-weight: 500;
-  font-size: 1.25rem;
-
-  padding: 15px;
-  margin-left: -40px;
-
+  gap: 14px;
+  padding: 11px 16px;
+  color: rgba(255, 255, 255, 0.55);
   text-decoration: none;
-  transition: 0.2s ease;
-
   white-space: nowrap;
+  transition: background 0.2s ease, color 0.2s ease;
+  border-left: 2px solid transparent;
+  position: relative;
 }
 
-.sidebar-links li a:hover {
+.sidebar-link:hover {
   background: var(--bg-hover);
-  color: var(--text-primary);
-  border-radius: 4px;
+  color: rgba(255, 255, 255, 0.9);
 }
 
-/* =========================
-   🎯 Icons
-   ========================= */
-.icon {
-  width: 2rem !important;
-  height: 2rem !important;
+.sidebar-link.active {
+  background: var(--bg-hover);
+  color: var(--text-inverse);
+  border-left-color: var(--icon-color);
+}
 
+.sidebar-icon {
+  width: 20px;
+  height: 20px;
   flex-shrink: 0;
-
-  transition: stroke 0.2s ease;
+  stroke: currentColor;
+  fill: none;
 }
 
-.sidebar-links li a:hover .icon {
-  stroke: var(--text-primary);
+/* For the audit trail icon which uses fill */
+.sidebar-icon.fill-icon {
+  fill: currentColor;
+  stroke: none;
+}
+
+.sidebar-label {
+  font-size: 13px;
+  font-weight: 500;
+  white-space: nowrap;
+  opacity: 0;
+  transition: opacity 0.15s ease;
+}
+
+.sidebar:hover .sidebar-label {
+  opacity: 1;
 }
 
 /* =========================
-   🎯 Module
+   Main Wrapper
    ========================= */
-.title {
-  border-radius: 1rem;
-  background-color: var(--bg-form);
-  padding: 15px;
+.main-wrapper {
+  margin-left: var(--sidebar-width-collapsed);
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  overflow: hidden;
+  transition: margin-left 0.35s ease;
+  min-width: 0;
+}
+
+/* =========================
+   Topbar
+   ========================= */
+.topbar {
+  height: var(--topbar-height);
+  display: flex;
+  align-items: center;
+  padding: 0 24px;
+  background: var(--bg-form);
+  border-bottom: 0.5px solid var(--border);
+  flex-shrink: 0;
+}
+
+.topbar-title {
+  font-size: 17px;
+  font-weight: 600;
   color: var(--text-primary);
-  font-size: 2.5rem;
-  font-weight: bolder;
-  margin-bottom: 25px;
 }
 
+/* =========================
+   Page Content
+   ========================= */
+.page-content {
+  flex: 1;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+
+/* =========================
+   Module Container
+   ========================= */
 .module-container {
-    padding: 1.5rem;
-    min-height: 100vh;
-    display: flex;
-    flex-direction: column;
-    background-color: var(--bg-body);
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  padding: 20px 24px;
+  gap: 14px;
+  overflow: hidden;
+  min-height: 0;
+  background: var(--bg-body);
 }
 
-/* ===== BASE (LIGHT / EXCEL-LIKE) ===== */
+/* =========================
+   Shared Card
+   ========================= */
+.card-surface {
+  background: var(--bg-form);
+  border: 0.5px solid var(--border);
+  border-radius: var(--radius-lg);
+}
 
+/* =========================
+   Handsontable overrides
+   (always light, Excel-like)
+   ========================= */
 .handsontable,
 .ht_master,
 .ht_master .wtHolder,
-.ht_master .wtHider,
+.ht_master .wtHider {
+  background: #ffffff !important;
+  color: #000 !important;
+  font-family: Calibri, Arial, sans-serif;
+}
+
+.handsontable td {
+  background: #ffffff !important;
+  color: #000 !important;
+}
+
+.handsontable th {
+  background: #f3f3f3 !important;
+  color: #000 !important;
+  font-weight: 600;
+  border-color: #d0d0d0 !important;
+}
+
 .handsontable td,
-.handsontable textarea.handsontableInput,
-.handsontableInput,
-.handsontableInputHolder,
+.handsontable th {
+  border-color: #dcdcdc !important;
+}
+
+.handsontable .htDimmed,
+.handsontable .htReadOnly {
+  background: #f5f5f5 !important;
+  color: #666 !important;
+}
+
+.handsontable .current {
+  outline: 2px solid #217346 !important;
+}
+
 .htMenu,
 .htFiltersConditionsMenu,
 .htUISelect,
 .htDropdownMenu {
-    background: #ffffff !important;
-    color: #000000 !important;
-    font-family: Calibri, Arial, sans-serif;
-}
-
-/* ===== HEADERS ===== */
-.handsontable th {
-    background: #f3f3f3 !important;
-    color: #000000 !important;
-    font-weight: 600;
-    border-color: #d0d0d0 !important;
-}
-
-/* ===== GRIDLINES ===== */
-.handsontable td,
-.handsontable th {
-    border-color: #dcdcdc !important;
-}
-
-/* ===== READONLY ===== */
-.handsontable td.htDimmed,
-.handsontable td[class*="htDimmed"] {
-    background: #d3d3d3 !important;
-    color: #000000 !important;
-}
-
-/* ===== ACTIVE CELL / EDIT FIX ===== */
-.handsontable td.area.current,
-.handsontable .wtBorder.current {
-    background: #ffffff !important;
-}
-
-/* ===== FILTER / DROPDOWN UI ===== */
-.htUISelect,
-.htUISelect .htUISelectCaption,
-.htUISelect .htFiltersMenuCondition,
-.htFiltersConditionsMenu {
-    background: #ffffff !important;
-    color: #000000 !important;
+  background: #ffffff !important;
+  color: #000 !important;
+  border: 1px solid #ccc !important;
 }
 
 .htMenu input,
 .htFiltersConditionsMenu input,
 .htUISelect input {
-    background: #ffffff !important;
-    color: #000000 !important;
-    border: 1px solid #ccc !important;
+  background: #ffffff !important;
+  color: #000 !important;
+  border: 1px solid #ccc !important;
 }
 
-/* ===== BUTTONS ===== */
 .htMenu button {
-    background: #f3f3f3 !important;
-    color: #000000 !important;
-    border: 1px solid #ccc !important;
+  background: #f3f3f3 !important;
+  color: #000 !important;
+  border: 1px solid #ccc !important;
 }
 
 .htMenu button:hover {
-    background: #e2e2e2 !important;
+  background: #e2e2e2 !important;
 }
 
-/* Default active (will be overridden below) */
 .htMenu button.htItemWrapperActive {
-    background: #217346 !important;
-    color: #ffffff !important;
+  background: #217346 !important;
+  color: #fff !important;
+  border-color: #217346 !important;
 }
 
-/* ===== SCROLLBAR ===== */
-.ht_master ::-webkit-scrollbar {
-    background: #f1f1f1;
-}
-.ht_master ::-webkit-scrollbar-thumb {
-    background: #c1c1c1;
-}
-
-
-/* ===================================================== */
-/* ===== EXCEL GREEN THEME (ONLY booksTable) ===== */
-/* ===================================================== */
-
-#booksTable .handsontable th,
-#booksTable .handsontable .rowHeader,
-#booksTable .handsontable th.ht__highlight {
-    background: #426753 !important;
-    color: #ffffff !important;
-    border-color: #1a5c38 !important;
-}
-
-#booksTable .handsontable th.ht__active_highlight {
-    background: #1a5c38 !important;
-}
-
-/* Selection + borders */
-.handsontable .wtBorder.current,
-.handsontable .wtBorder.area,
-.handsontable .wtBorder.fill {
-    background: #217346 !important;
-}
-
-/* Selection highlight */
-#booksTable .handsontable td.area {
-    background: rgba(33, 115, 70, 0.15) !important;
-}
-
-/* Filter dropdown arrow */
-#booksTable .handsontable .changeType {
-  background: #a6a6a6 !important;  
-  color: #000000 !important;
-}
-
-/* Filter OK button */
-.htMenu button.htUIButtonOK {
-    background: #217346 !important;
-    color: #ffffff !important;
-    border-color: #217346 !important;
-}
-
-.htMenu button.htUIButtonOK:hover {
-    background: #1a5c38 !important;
-}
-
-/* Checkbox accent */
-.htUICheckbox input[type="checkbox"]:checked {
-    accent-color: #217346;
+.ht_master .wtHolder {
+  background: #ffffff !important;
 }
