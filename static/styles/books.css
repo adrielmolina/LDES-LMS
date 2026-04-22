@@ -1,3 +1,6 @@
+#booksTable {
+    height: 100vh;
+}
 
 #booksTable th, 
 #booksTable td {
@@ -157,6 +160,13 @@
     width: 100%;
 }
 
+/* wrapper to properly align icon + input + button */
+.search-box {
+    position: relative;
+    width: 100%;
+}
+
+/* icon stays left */
 .search-icon {
     position: absolute;
     left: 12px;
@@ -167,8 +177,11 @@
     pointer-events: none;
 }
 
+/* input keeps your existing styling */
 .search-input {
+    width: 100%;
     padding-left: 35px;
+    padding-right: 30px; /* space for clear button */
     border-radius: 8px;
     border: 1px solid var(--bg-hover);
     background-color: var(--bg-form);
@@ -185,6 +198,34 @@
 .search-input::placeholder {
     color: var(--text-secondary);
     opacity: 0.6;
+}
+
+/* NEW: clear button inside input */
+.clear-btn {
+    position: absolute;
+    right: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    border: none;
+    background: none;
+    color: var(--text-secondary);
+    font-size: 1.1rem;
+    cursor: pointer;
+    padding: 0;
+    line-height: 1;;
+    background-color: #97736560;
+    padding: 1%;
+    border-radius: 5px;
+}
+
+.clear-btn:hover {
+    color: #7b91ad;
+    background-color: #38a87243;
+    transform: translateY(-50%) scale(1.15);
+}
+
+.clear-btn:hover {
+    color: var(--text-primary);
 }
 
 /* Responsive */

@@ -1,6 +1,7 @@
 {% extends 'base.html' %}
 
 {% block title %}Books Management{% endblock %}
+{% block page_title %}Books Management{% endblock %}
 
 {% block head %}
     <link rel="stylesheet" href="{{ url_for('static', filename='styles/books.css') }}">
@@ -8,19 +9,21 @@
 
 {% block content %}
 <div class="module-container">
-    <div class="module-header">
-        <h1 class="title">Book Management</h1>
-    </div>
 
     <div id="buttons_container" class="buttons_container">
         <div class="button-group-left">
             <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addBookModal">Add Book (Ctrl + 1)</button>
             <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#genreOverlayModal" onclick="loadGenres()">Add Genre (Ctrl + 2)</button>
         </div>
+
         <div class="search-wrapper">
+          <div class="search-box">
             <span class="search-icon">🔍</span>
-                <input type="text" id="searchTable" class="form-control search-input" placeholder="Search books...">
-                <button id="clearSearchInput">×</button>
+
+            <input type="text" id="searchTable" class="search-input" placeholder="Search books...">
+
+            <button id="clearSearchInput" class="clear-btn">X</button>
+          </div>
         </div>
     </div>
     <!-- Genre Overlay Modal -->
@@ -216,8 +219,8 @@
 
         colHeaders: [
             "Book ID",
-            "Accession Start",
-            "Accession End",
+            "Accession # Start",
+            "Accession # End",
             "ISBN",
             "Title",
             "Author",
@@ -388,7 +391,7 @@
         licenseKey: 'non-commercial-and-evaluation',
         //contextMenu: true, // overwritten above 
         manualColumnResize: true,
-        manualRowResize: true,
+        manualRowResize: false,
 
         // Sorting + filtering
         columnSorting: true,
@@ -398,7 +401,12 @@
         // Navigation
         stretchH: 'all',
         width: '100%',
-        height: 500,
+        height: '100%',
+        hiddenColumns: {
+          columns: [0,13,14], // indexes of columns you want hidden
+          indicators: false   // optional: hides little UI markers
+        },
+
 
         // Auto new row
         minSpareRows: 1
