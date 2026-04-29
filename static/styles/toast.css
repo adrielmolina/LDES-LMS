@@ -1,0 +1,164 @@
+/* Override Bootstrap's .toast display:none */
+.toast-container .toast {
+  display: flex !important;
+  background: var(--bg-form) !important;
+}
+
+/* =========================
+   Toast Container
+   ========================= */
+.toast-container {
+  position: fixed;
+  top: 24px;
+  right: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  z-index: 9999;
+  pointer-events: none;
+}
+
+/* =========================
+   Toast Base
+   ========================= */
+.toast {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 14px;
+  border-radius: 10px;
+  border: 0.5px solid transparent;
+  background: var(--bg-form);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1), 0 1px 4px rgba(0, 0, 0, 0.06);
+  min-width: 280px;
+  max-width: 380px;
+  position: relative;
+  overflow: hidden;
+  pointer-events: all;
+
+  opacity: 0;
+  transform: translateX(16px);
+  transition: opacity 0.25s ease, transform 0.25s ease;
+}
+
+.toast--visible {
+  opacity: 1;
+  transform: translateX(0);
+}
+
+.toast--hide {
+  opacity: 0;
+  transform: translateX(16px);
+}
+
+/* =========================
+   Icon
+   ========================= */
+.toast-icon {
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.toast-icon svg {
+  width: 18px;
+  height: 18px;
+}
+
+/* =========================
+   Message
+   ========================= */
+.toast-message {
+  flex: 1;
+  font-size: 13px;
+  font-weight: 500;
+  line-height: 1.4;
+  color: var(--text-primary);
+}
+
+/* =========================
+   Close Button
+   ========================= */
+.toast-close {
+  width: 22px;
+  height: 22px;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 4px;
+  flex-shrink: 0;
+  opacity: 0.45;
+  transition: opacity 0.15s ease, background 0.15s ease;
+  padding: 0;
+  color: var(--text-primary);
+}
+
+.toast-close:hover {
+  opacity: 1;
+  background: rgba(0, 0, 0, 0.06);
+}
+
+.toast-close svg {
+  width: 13px;
+  height: 13px;
+  stroke: currentColor;
+  fill: none;
+}
+
+/* =========================
+   Progress Bar
+   ========================= */
+.toast-progress {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  height: 2.5px;
+  width: 100%;
+  border-radius: 0 0 10px 10px;
+  transition: width linear;
+}
+
+/* =========================
+   Type Variants — Style A
+   White bg, colored icon + border + progress
+   ========================= */
+.toast--success {
+  border-color: rgba(59, 109, 17, 0.2);
+}
+.toast--success .toast-icon  { color: var(--status-success); }
+.toast--success .toast-progress { background: var(--status-success); }
+
+.toast--error {
+  border-color: rgba(163, 45, 45, 0.2);
+}
+.toast--error .toast-icon    { color: var(--status-error); }
+.toast--error .toast-progress   { background: var(--status-error); }
+
+.toast--warning {
+  border-color: rgba(133, 79, 11, 0.2);
+}
+.toast--warning .toast-icon  { color: var(--status-warning); }
+.toast--warning .toast-progress { background: var(--status-warning); }
+
+.toast--info {
+  border-color: rgba(24, 95, 165, 0.2);
+}
+.toast--info .toast-icon     { color: var(--status-info); }
+.toast--info .toast-progress    { background: var(--status-info); }
+
+/* =========================
+   Dark Mode
+   ========================= */
+.dark-mode .toast {
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.35), 0 1px 4px rgba(0, 0, 0, 0.2);
+}
+
+.dark-mode .toast-close:hover {
+  background: rgba(255, 255, 255, 0.08);
+}
