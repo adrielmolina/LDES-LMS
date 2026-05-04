@@ -11,19 +11,26 @@
 <div class="module-container">
 
     <div id="buttons_container" class="buttons_container">
+        <!-- Left side -->
         <div class="button-group-left">
             <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addBookModal">Add Book (Ctrl + 1)</button>
             <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#genreOverlayModal" onclick="loadGenres()">Add Genre (Ctrl + 2)</button>
         </div>
 
+
         <div class="search-wrapper">
-          <div class="search-box">
-            <span class="search-icon">🔍</span>
+            <div class="search-box">
+                <span class="search-icon">🔍</span>
 
-            <input type="text" id="searchTable" class="search-input" placeholder="Search books...">
+                <input type="text" id="searchTable" class="search-input" placeholder="Search books...">
 
-            <button id="clearSearchInput" class="clear-btn">X</button>
-          </div>
+                <button id="clearSearchInput" class="clear-btn">X</button>
+            </div>
+        </div>
+
+        <!-- Right side -->
+        <div class="button-group-right">
+            <button id="refreshTable" type="button" class="btn btn-outline-primary">Refresh Table</button>
         </div>
     </div>
     <!-- Genre Overlay Modal -->
@@ -143,12 +150,18 @@
                     <div class="row">
                         <div class="col-md-3">
                             <label for="keyStage" class="form-label">Key Stage Grade Level</label>
-                            <select class="form-select" id="keyStage">
+                            <select class="form-select" id="keyStage" name="keystage">
                                 <option value="">Select Key Stage</option>
+
                                 <option value="KS 1 - Kinder to Grade 3">KS 1 - Kinder to Grade 3</option>
-                                <option value="KS 2 - Grade 4 to Grade 6">KS 2 - Grade 4 to Grade 6</option>
-                                <option value="KS 3 - Grade 7 to Grade 10">KS 3 - Grade 7 to Grade 10</option>
-                                <option value="KS 4 - Grade 11 to Grade 12">KS 4 - Grade 11 to Grade 12</option>
+                                <option value="KS 1 &amp; 2 - Kinder to Grade 6">KS 1 &amp; 2 - Kinder to Grade 6</option>
+                                <option value="KS 2 - Grade 4 to 6">KS 2 - Grade 4 to 6</option>
+                                <option value="KS 4 - Grade 11 to 12">KS 4 - Grade 11 to 12</option>
+                                <option value="KS 3 &amp; 4 - Grade 7 to 12">KS 3 &amp; 4 - Grade 7 to 12</option>
+                                <option value="KS 3 - Grade 7 to 10">KS 3 - Grade 7 to 10</option>
+                                <option value="Kinder to Grade 1">Kinder to Grade 1</option>
+                                <option value="KS 2 &amp; 3 - Grade 4 to 10">KS 2 &amp; 3 - Grade 4 to 10</option>
+                                <option value="KS 1 - Kinder at Grade 3">KS 1 - Kinder at Grade 3</option>
                             </select>
                         </div>
                         <div class="col-md-3">
@@ -239,15 +252,38 @@
 
         columns: [
             { data: 'book_id', readOnly: true },
-            { data: 'accession_no_start', type: 'numeric' },
-            { data: 'accession_no_end', type: 'numeric' },
+            { data: 'accession_no_start', readOnly: true},
+            { data: 'accession_no_end', readOnly: true},
             { data: 'isbn' },
             { data: 'title' },
-            { data: 'author' },
-            { data: 'illustrator' },
-            { data: 'publisher' },
+            //{ data: 'author' },
+            //{ data: 'illustrator' },
+            //{ data: 'publisher' },
+            {
+                data: 'author',
+                type: 'autocomplete',
+                source: function (query, process) {
+                const values = originalData.map(r => r.author).filter(Boolean);
+                process([...new Set(values)]);
+                }
+            },
+            {
+                data: 'illustrator',
+                type: 'autocomplete',
+                source: function (query, process) {
+                const values = originalData.map(r => r.illustrator).filter(Boolean);
+                process([...new Set(values)]);
+                }
+            },
+            {
+                data: 'publisher',
+                type: 'autocomplete',
+                source: function (query, process) {
+                const values = originalData.map(r => r.publisher).filter(Boolean);
+                process([...new Set(values)]);
+                }
+            },
             { data: 'publication_year', type: 'numeric' },
-            
             {
                 data: 'category_id',
                 type: 'dropdown',
@@ -257,7 +293,7 @@
                     const name = window.genreMap?.[Number(value)] || null;
                     if (!name && value) {
                         td.innerText = `Unknown (ID: ${value})`;
-                        td.style.color = 'red';
+                        td.style.color = '';
                     } else {
                         td.innerText = name || '';
                         td.style.color = '';  // 👈 don't forget this reset
@@ -266,8 +302,8 @@
                 }
             },
             //{ data: 'category_id', type: 'numeric'},
-            { data: 'total_copies', type: 'numeric' },
-            { data: 'available_copies', type: 'numeric' },
+            { data: 'total_copies', type: 'numeric'},
+            { data: 'available_copies', type: 'numeric', readOnly: true },
             { data: 'shelf_location' },
             { data: 'created_at', type: 'date', dateFormat: 'YYYY-MM-DD' , readOnly: true},
             { data: 'last_updated_at', type: 'date', dateFormat: 'YYYY-MM-DD' , readOnly: true},
@@ -326,7 +362,12 @@
                         })
                         .catch(console.error);
                 } else {
-                    saveField(bookId, prop, valueToSave);
+                    // reload table after editing the total copies to update the accession number
+                    saveField(bookId, prop, valueToSave).then(() => {
+                        if (prop === 'total_copies') {
+                            loadBooks(); // 👈 reuse your existing reload
+                        }
+                    });
                 }
             });
         },
@@ -403,7 +444,7 @@
         width: '100%',
         height: '100%',
         hiddenColumns: {
-          columns: [0,13,14], // indexes of columns you want hidden
+          columns: [13,14], // indexes of columns you want hidden
           indicators: false   // optional: hides little UI markers
         },
 
@@ -554,6 +595,12 @@
             console.log(bookData); // 👈 for now
 
             // later: send to API
+        });
+
+        document.getElementById('refreshTable').addEventListener('click', () => {
+            loadGenres(); // ensure genres are fresh for the renderer
+            loadBooks();
+            console.log('Table refreshed');
         });
 
     </script>

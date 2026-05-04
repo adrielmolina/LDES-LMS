@@ -2,7 +2,7 @@
 
 
 {% block title %}Book Borrow{% endblock %}
-
+{% block page_title %}Borrow & Return{% endblock %}
 
 {% block head %}
     <link rel="stylesheet" href="{{ url_for('static', filename='styles/borrow.css') }}">
@@ -12,12 +12,18 @@
 {% block content %}
 <div class="module-container">
     <div class="module-header">
-        <h1 class="title">Borrow & Return</h1>
+        <h1 class="title">Borrow &amp; Return</h1>
     </div>
 
     <div id="buttons_container" class="buttons_container">
+        <!-- Left side -->
         <div class="button-group-left">
             <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#borrowModal">Borrow Book (Ctrl + 1)</button>
+        </div>
+
+        <!-- Right side -->
+        <div class="button-group-right">
+            <button id="refreshTable" type="button"  class="btn btn-outline-primary">Refresh Table</button>
         </div>
     </div>
 
@@ -36,55 +42,68 @@
                 <!-- Book Info -->
                 <h6 class="mb-3">Book Information</h6>
                 <div class="row g-3 mb-3">
-                    <div class="col-md-6">
-                    <label class="form-label">Book ID</label>
-                    <input type="number" class="form-control" name="book_id" required>
-                    </div>
-                    <div class="col-md-6">
-                    <label class="form-label">Number of Copies</label>
-                    <input type="number" class="form-control" name="no_of_copies" min="1" value="1">
-                    </div>
-                </div>
+    
+    <div class="col-md-4">
+        <label class="form-label">Book ID</label>
+        <input id="book_id" type="number" class="form-control" name="book_id" required readonly>
+    </div>
+
+    <div class="col-md-4">
+        <label class="form-label">Book Name *</label>
+        <input list="bookList" class="form-control" name="book_name" id="book_name" required>
+        <datalist id="bookList"></datalist>
+    </div>
+
+    <div class="col-md-4">
+        <label class="form-label">Number of Copies</label>
+        <input id="noOfCopies" type="number" class="form-control" name="no_of_copies" min="1" value="1">
+    </div>
+
+</div>
 
                 <!-- Student Info -->
                 <h6 class="mb-3">Student Information</h6>
                 <div class="row g-3 mb-3">
                     <div class="col-md-4">
-                    <label class="form-label">Student LRN</label>
-                    <input type="number" class="form-control" name="student_lrn">
+                    <label class="form-label">Borrower ID#</label>
+                    <input id="borrowerID" type="number" class="form-control" name="student_lrn">
                     </div>
                     <div class="col-md-4">
-                    <label class="form-label">Student Name</label>
+                    <label class="form-label">Borrower Name *</label>
                     <input type="text" class="form-control" name="student_name">
                     </div>
                     <div class="col-md-4">
-                    <label class="form-label">School ID</label>
-                    <input type="number" class="form-control" name="student_school" required>
+                    <label class="form-label">Borrower School</label>
+                    <input id="borrowerSchool" type="text" class="form-control" name="student_school">
                     </div>
                 </div>
 
                 <!-- Librarian -->
                 <h6 class="mb-3">Transaction Info</h6>
                 <div class="row g-3 mb-3">
+                    <!--                     
                     <div class="col-md-4">
                     <label class="form-label">Librarian ID</label>
                     <input type="number" class="form-control" name="librarian_id" required>
+                    </div> -->
+
+                    <div class="col-md-4">
+                    <label class="form-label">Borrow Date *</label>
+                    <input id="borrowDate" type="date" class="form-control" name="borrow_date">
                     </div>
 
                     <div class="col-md-4">
-                    <label class="form-label">Borrow Date</label>
-                    <input type="date" class="form-control" name="borrow_date">
-                    </div>
-
-                    <div class="col-md-4">
-                    <label class="form-label">Due Date</label>
-                    <input type="date" class="form-control" name="due_date">
+                    <label class="form-label">Due Date *</label>
+                    <input id="dueDate" type="date" class="form-control" name="due_date">
                     </div>
                 </div>
 
+
                 <!-- Status -->
                 <div class="row g-3 mb-3">
-                    <div class="col-md-4">
+                    
+                    <!-- removed as this is automated.  -->
+                    <!-- <div class="col-md-4">
                     <label class="form-label">Status</label>
                     <select class="form-select" name="status" required>
                         <option value="borrowed" selected>Borrowed</option>
@@ -92,18 +111,20 @@
                         <option value="overdue">Overdue</option>
                         <option value="lost">Lost</option>
                     </select>
-                    </div>
+                    </div> -->
 
-                    <div class="col-md-4">
+                    <!-- <div class="col-md-4">
                     <label class="form-label">Return Date</label>
                     <input type="date" class="form-control" name="return_date">
-                    </div>
-
-                    <div class="col-md-4">
+                    </div> -->
+                    
+            
+                    <!-- <div class="col-md-4">
                     <label class="form-label">Renewal Count</label>
                     <input type="number" class="form-control" name="renewal_count" value="0">
-                    </div>
+                    </div> -->
                 </div>
+                
 
                 <!-- Remarks -->
                 <div class="mb-3">
@@ -115,7 +136,7 @@
 
                 <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                <button type="submit" class="btn btn-primary">Save Transaction</button>
+                <button id="confirmBorrow" type="submit" class="btn btn-primary">Confirm</button>
                 </div>
             </form>
 
@@ -123,17 +144,14 @@
         </div>
     </div>
 
-
-
     <table id="borrowsTable" class="table table-striped">
         <thead>
             <tr>
                 <th>ID</th>
-                <th>Book ID</th>
-                <th>Student LRN</th>
-                <th>Student Name</th>
-                <th>School</th>
-                <th>Librarian ID</th>
+                <th>Book Name</th>
+                <th>Borrower ID#</th>
+                <th>Borrower Name</th>
+                <th>Borrower School</th>
                 <th>Borrow Date</th>
                 <th>Due Date</th>
                 <th>Return Date</th>
@@ -141,17 +159,17 @@
                 <th>Renewals</th>
                 <th>Copies</th>
                 <th>Remarks</th>
-                <th>Created At</th>
+                <th>Actions</th>
+                <th>Delete</th>
             </tr>
         </thead>
         <tbody>
-            <tr>
+            <!-- <tr>
                 <td>1</td>
                 <td>101</td>
                 <td>2023001234</td>
                 <td>Juan Dela Cruz</td>
-                <td>1</td>
-                <td>5</td>
+                <td>LDES</td>
                 <td>2026-03-18</td>
                 <td>2026-03-25</td>
                 <td></td>
@@ -159,25 +177,12 @@
                 <td>0</td>
                 <td>1</td>
                 <td>Good condition</td>
-                <td>2026-03-18</td>
-            </tr>
-
-            <tr>
-                <td>2</td>
-                <td>101</td>
-                <td>2023001234</td>
-                <td>Juan Dela Cruz</td>
-                <td>1</td>
-                <td>5</td>
-                <td>2026-03-18</td>
-                <td>2026-03-25</td>
-                <td></td>
-                <td>borrowed</td>
-                <td>0</td>
-                <td>1</td>
-                <td>Good condition</td>
-                <td>2026-03-18</td>
-            </tr>
+                <td>
+                    <button class="btn btn-sm btn-success">Return</button>
+                    <button class="btn btn-sm btn-warning">Renew</button>
+                    <button class="btn btn-sm btn-danger">Lost</button>
+                </td>
+            </tr> -->
         </tbody>
     </table>
 </div>
@@ -185,40 +190,343 @@
 
 
 {% block extra_scripts %}
+    <script src="{{ url_for('static', filename='js/booksList.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/borrowActions.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/autoOverdue.js') }}"></script>
     <script>
-        // FOR THE BOOKS TABLE
-        let table = new DataTable('#borrowsTable', {
-            responsive: true,
-            paging: true,
-            searching: true,
-            ordering: true,
-            info: true,
-            scrollX: true
+        
+        //clear form on refresh
+        document.addEventListener('DOMContentLoaded', () => {
+            $('#borrowsTable').DataTable({
+                responsive: true,
+                paging: true,
+                searching: true,
+                ordering: true,
+                info: true,
+                scrollX: true,
+                columnDefs: [
+                    { orderable: false, targets: -1 } // disable sorting on actions
+                ]
+            });
+
+            loadBorrows();
+
+            const form = document.getElementById('borrowForm');
+
+            if (form) {
+                // 👇 reset all form fields
+                form.reset();
+            }
+
+            // 👇 Book Info
+            const bookId = form?.querySelector('[name="book_id"]');
+            const bookName = form?.querySelector('[name="book_name"]');
+            const copies = form?.querySelector('[name="no_of_copies"]');
+
+            if (bookId) bookId.value = "";
+            if (bookName) bookName.value = "";
+            if (copies) {
+                copies.value = 1;
+                copies.max = "";
+                copies.disabled = false;
+            }
+
+            // 👇 Student Info
+            const studentLrn = form?.querySelector('[name="student_lrn"]');
+            const studentName = form?.querySelector('[name="student_name"]');
+            const studentSchool = form?.querySelector('[name="student_school"]');
+
+            if (studentLrn) studentLrn.value = "";
+            if (studentName) studentName.value = "";
+            if (studentSchool) studentSchool.value = "";
+
+            // 👇 Librarian / Transaction Info
+            const librarianId = form?.querySelector('[name="librarian_id"]');
+            const borrowDate = form?.querySelector('[name="borrow_date"]');
+            const dueDate = form?.querySelector('[name="due_date"]');
+
+            if (librarianId) librarianId.value = "";
+            if (borrowDate) borrowDate.value = "";
+            if (dueDate) dueDate.value = "";
+
+            // 👇 Status Section
+            const status = form?.querySelector('[name="status"]');
+            const returnDate = form?.querySelector('[name="return_date"]');
+            const renewalCount = form?.querySelector('[name="renewal_count"]');
+
+            if (status) status.value = "borrowed";
+            if (returnDate) returnDate.value = "";
+            if (renewalCount) renewalCount.value = 0;
+
+            // 👇 Remarks
+            const remarks = form?.querySelector('[name="remarks"]');
+            if (remarks) remarks.value = "";
         });
+
+        // for the datalist in the form
+        document.addEventListener('DOMContentLoaded', loadBookDatalist);
+        document.getElementById('refreshTable').addEventListener('click', refreshData);
+
+        function refreshData() {
+            loadBorrows();
+            loadBookDatalist();
+            console.log("Table and datalist refreshed.");
+        }
+        
+        // TODO handle case when user types a book name that doesn't exist in the datalist (clear book_id and disable copies input)
+        //Auto-fill Book ID + set max copies
+        const bookInput = document.getElementById('book_name');
+        const bookIdInput = document.querySelector('input[name="book_id"]');
+        const copiesInput = document.querySelector('input[name="no_of_copies"]');
+
+        function updateBookLimiter() {
+            const options = document.getElementById('bookList').options;
+
+            let selected = null;
+
+            for (let opt of options) {
+                if (opt.value === bookInput.value) {
+                    selected = opt;
+                    break;
+                }
+            }
+
+            if (selected) {
+                const available = Number(selected.dataset.available || 0);
+
+                bookIdInput.value = selected.dataset.id;
+
+                copiesInput.max = available;
+                copiesInput.value = available > 0 ? 1 : 0;
+                copiesInput.disabled = available <= 0;
+            } else {
+                bookIdInput.value = "";
+                copiesInput.max = "";
+                copiesInput.value = 1;
+                copiesInput.disabled = true;
+            }
+        }
+
+        //TODO add delete transaction function and add a confrmation dialog
+
+        // 👇 attach listener
+        bookInput.addEventListener('input', updateBookLimiter);
+
+        copiesInput.addEventListener('input', function () {
+            const max = Number(this.max) || 1;
+            let val = Number(this.value);
+
+            if (val > max) this.value = max;
+            if (val < 1) this.value = 1;
+        });
+
+        // load borrows data into the table. call to refresh table after actions
+        async function loadBorrows() {
+            const res = await fetch('/api/borrow');
+            const result = await res.json();
+
+            if (result.error) {
+                console.error(result.error);
+                return;
+            }
+
+            const table = $('#borrowsTable').DataTable();
+
+            table.clear();
+
+            result.data.forEach(row => {
+                table.row.add([
+                    row.id,
+                    bookMap[row.book_id] || row.book_id,
+                    row.student_lrn || "",
+                    row.student_name || "",
+                    row.student_school || "",
+                    row.borrow_date || "",
+                    row.due_date || "",
+                    row.return_date || "",
+                    row.status || "",
+                    row.renewal_count || 0,
+                    row.no_of_copies || 0,
+                    row.remarks || "",
+                    `
+                        <div class="d-flex gap-1">
+                            <button class="btn btn-sm btn-success" data-id="${row.id}" data-action="return">Return</button>
+                            <button class="btn btn-sm btn-warning" data-id="${row.id}" data-action="renew">Renew</button>
+                            <button class="btn btn-sm btn-danger" data-id="${row.id}" data-action="lost">Lost</button>
+                        </div>
+                    `,
+                    `<button class="btn btn-sm btn-outline-danger" data-id="${row.id}" data-action="delete">Delete</button>`
+                ]);
+            });
+
+            table.draw();
+        }
+
+        
+
+
 
 
         // FOR THE FORM
         const form = document.getElementById('borrowForm');
 
-        // Auto-set today as borrow date
-        document.getElementById('borrowModal').addEventListener('shown.bs.modal', () => {
-            const today = new Date().toISOString().split('T')[0];
-            form.borrow_date.value = today;
+
+        // for the borrow date auto-fill and due date auto-update
+        const borrowModal = document.getElementById('borrowModal');
+        const borrowDateInput = document.getElementById('borrowDate');
+        const dueDateInput = document.getElementById('dueDate');
+
+        // 👇 local date formatter (PH-safe)
+        function formatLocalDate(date) {
+            const year = date.getFullYear();
+            const month = String(date.getMonth() + 1).padStart(2, '0');
+            const day = String(date.getDate()).padStart(2, '0');
+            return `${year}-${month}-${day}`;
+        }
+
+        // 👇 add X days
+        function addDays(date, days) {
+            const result = new Date(date);
+            result.setDate(result.getDate() + days);
+            return result;
+        }
+
+        // 👇 modal open → today + 7 days
+        borrowModal.addEventListener('shown.bs.modal', () => {
+            const now = new Date();
+
+            borrowDateInput.value = formatLocalDate(now);
+            dueDateInput.value = formatLocalDate(addDays(now, 7));
         });
 
-        form.addEventListener('submit', e => {
+        // 👇 borrow date edited → due date auto-updates
+        borrowDateInput.addEventListener('change', function () {
+            if (!this.value) return;
+
+            const selectedBorrowDate = new Date(this.value + "T00:00:00");
+            dueDateInput.value = formatLocalDate(addDays(selectedBorrowDate, 7));
+        });
+
+
+        // submit new borrow
+        document.getElementById('borrowForm').addEventListener('submit', async function (e) {
             e.preventDefault();
 
-            const data = Object.fromEntries(new FormData(form));
+            // 👇 collect form values
+            const payload = {
+                book_id: document.getElementById('book_id')?.value || "",
+                no_of_copies: document.getElementById('noOfCopies')?.value || "",
 
-            // API placeholder
-            console.log('API CALL: BORROW', data);
+                borrower_id: document.getElementById('borrowerID')?.value || "",
+                borrower_name: document.querySelector('[name="student_name"]')?.value.trim() || "",
+                borrower_school: document.getElementById('borrowerSchool')?.value || "",
 
-            // close modal (optional)
-            const modal = bootstrap.Modal.getInstance(document.getElementById('borrowModal'));
-            modal.hide();
+                borrow_date: document.getElementById('borrowDate')?.value || "",
+                due_date: document.getElementById('dueDate')?.value || "",
 
-            form.reset();
+                remarks: document.querySelector('[name="remarks"]')?.value.trim() || ""
+            };
+
+            // 👇 optional front-end validation
+            if (!payload.book_id) {
+                alert("Please select a valid book.");
+                return;
+            }
+
+            if (!payload.borrower_name) {
+                alert("Please complete borrower information.");
+                return;
+            }
+
+            if (!payload.borrow_date || !payload.due_date) {
+                alert("Please set borrow and due dates.");
+                return;
+            }
+
+            // prevent 0 or invalid copies
+            if (!payload.no_of_copies || Number(payload.no_of_copies) < 1) {
+                alert("Number of copies must be at least 1.");
+                return;
+            }
+
+            console.log("Borrow Payload:", payload);
+
+            try {
+                const res = await fetch('/api/borrow', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+
+                console.log("STATUS:", res.status);
+
+                const result = await res.json();
+                console.log("RESPONSE:", result);
+
+                // success
+                const modal = bootstrap.Modal.getInstance(document.getElementById('borrowModal'));
+                if (modal) modal.hide();
+
+                form.reset();
+
+                // reset custom defaults
+                document.getElementById('book_id').value = "";
+                document.getElementById('noOfCopies').value = 1;
+
+                loadBookDatalist().then(() => {
+                    updateBookLimiter();
+                });// refresh datalist to update available copies
+                loadBorrows(); // refresh table
+
+
+                // 👇 placeholder success behavior
+                alert("Borrow transaction submitted successfully.");
+
+                // reset form after success
+                document.getElementById('borrowForm').reset();
+
+                // reset custom fields
+                document.getElementById('book_id').value = "";
+                document.getElementById('book_name').value = "";
+                document.getElementById('noOfCopies').value = 1;
+
+            } catch (err) {
+                console.error("Borrow transaction failed:", err);
+                alert("Something went wrong.");
+            }
+        });
+
+        // keybinds for new borrow transaction and confirm borrow
+        document.addEventListener('keydown', function (e) {
+            // 👇 CTRL + 1 → Open Borrow Modal
+            if (e.ctrlKey && e.key === '1') {
+                e.preventDefault();
+
+                const modalEl = document.getElementById('borrowModal');
+                if (!modalEl) return;
+
+                const modal = new bootstrap.Modal(modalEl);
+                modal.show();
+
+                // optional: focus first useful field
+                setTimeout(() => {
+                    document.getElementById('book_name')?.focus();
+                }, 200);
+            }
+
+            // 👇 ENTER → Trigger Confirm button ONLY when borrow modal is open
+            if (e.key === 'Enter') {
+                const modalEl = document.getElementById('borrowModal');
+
+                if (!modalEl || !modalEl.classList.contains('show')) return;
+
+                // 👇 prevent accidental submit loops
+                if (e.target.tagName === 'TEXTAREA') return;
+
+                e.preventDefault();
+
+                document.getElementById('confirmBorrow')?.click();
+            }
         });
 
     </script>
