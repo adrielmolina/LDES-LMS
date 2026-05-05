@@ -53,6 +53,12 @@
     padding: 1rem 1.5rem;
 }
 
+.pin-label {
+        font-size: 1rem;
+        font-weight: 400;
+        margin-left: 4px;
+}
+
 /* Form Labels */
 .form-label {
     color: var(--text-primary);
@@ -64,7 +70,8 @@
 /* Form Inputs */
 .form-control, .form-select {
     background-color: var(--bg-form);
-    border: 1px solid var(--bg-hover);
+    /* border: 1px solid var(--bg-hover); */
+    border: 1px solid #82808043;
     color: var(--text-primary);
     border-radius: 6px;
     padding: 0.5rem 0.75rem;

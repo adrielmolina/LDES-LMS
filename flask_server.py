@@ -279,6 +279,67 @@ def create_book():
     finally:
         conn.close()
 
+@server.route("/api/books/form", methods=["POST"])
+def create_book_form():
+    conn = db_conn.conn_init()
+    cursor = conn.cursor()
+
+    try:
+        data = request.get_json() or {}
+
+        today = date.today().isoformat()
+
+        cursor.execute("""
+            INSERT INTO books (
+                isbn,
+                title,
+                author,
+                illustrator,
+                publisher,
+                publication_year,
+                category_id,
+                total_copies,
+                shelf_location,
+                key_stage_grade_level,
+                no_of_pages,
+                created_at,
+                last_updated_at
+            )
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        """, (
+            data.get("isbn", ""),
+            data.get("title", ""),
+            data.get("author", ""),
+            data.get("illustrator", ""),
+            data.get("publisher", ""),
+            data.get("publication_year", ""),
+            data.get("category_id", ""),
+            data.get("total_copies", 40),  # default
+            data.get("shelf_location", ""),
+            data.get("key_stage", ""),
+            data.get("no_of_pages", 0),
+            today,
+            today
+        ))
+
+        conn.commit()
+
+        book_id = cursor.lastrowid
+
+        return jsonify({
+            "success": True,
+            "book_id": book_id
+        })
+
+    except Exception as e:
+        conn.rollback()
+        print("DB ERROR:", e)
+
+        return jsonify({"error": str(e)}), 500
+
+    finally:
+        conn.close()
+
 # TODO auto set the available to [total_copies] when adding new books,
 # TODO handle editing total_copies (if adding or removing, recompute available_copies accordingly by including ongoing borrowed copies in the calculation)
 @server.route("/api/books/<int:book_id>", methods=["PUT"])

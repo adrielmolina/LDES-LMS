@@ -91,6 +91,27 @@ body {
   transition: background-color 0.3s ease, color 0.3s ease;
 }
 
+/* DISABLE HIGHLIGHTING */
+/* disable on UI elements */
+body,
+.navbar,
+.sidebar,
+.card,
+.btn,
+th, 
+.handsontable th {
+    -webkit-user-select: none;
+    user-select: none;
+}
+
+/* keep enabled where needed */
+input,
+textarea,
+.handsontable td {
+    -webkit-user-select: text;
+    user-select: text;
+}
+
 /* =========================
    Sidebar
    ========================= */

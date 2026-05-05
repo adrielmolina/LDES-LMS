@@ -84,101 +84,179 @@
                 <h5 class="modal-title">Add New Book</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
+
             <div class="modal-body">
                 <form id="addBookForm">
+
+                    <div class="d-flex align-items-center mb-3">
+
+                        <!-- Batch Mode (left) -->
+                        <div class="form-check form-switch">
+                            <input class="form-check-input" type="checkbox" id="batchMode">
+                            <label class="form-check-label" for="batchMode">Batch Mode</label>
+                        </div>
+
+                        <!-- Reset (right) -->
+                        <button type="button" class="btn btn-outline-secondary ms-auto" id="resetFormBtn">
+                            Reset Form
+                        </button>
+
+                    </div>
+
                     <!-- Row 1 -->
                     <div class="row mb-3">
+
                         <div class="col-md-3">
-                            <label for="accessionStart" class="form-label">Accession Start</label>
-                            <input type="text" class="form-control" id="accessionStart" placeholder="Enter Accession Start">
+                            <label class="form-label">ISBN</label>
+                            <input type="text" class="form-control" id="isbn">
                         </div>
+
                         <div class="col-md-3">
-                            <label for="accessionEnd" class="form-label">Accession End</label>
-                            <input type="text" class="form-control" id="accessionEnd" placeholder="Enter Accession End">
+                            <label class="form-label">Title</label>
+                            <input type="text" class="form-control" id="title">
                         </div>
-                        <div class="col-md-3">
-                            <label for="isbn" class="form-label">ISBN</label>
-                            <input type="text" class="form-control" id="isbn" placeholder="Enter ISBN">
-                        </div>
-                        <div class="col-md-3">
-                            <label for="title" class="form-label">Title</label>
-                            <input type="text" class="form-control" id="title" placeholder="Enter Book Title">
-                        </div>
+
                     </div>
 
                     <!-- Row 2 -->
                     <div class="row mb-3">
+
                         <div class="col-md-3">
-                            <label for="author" class="form-label">Author</label>
-                            <input type="text" class="form-control" id="author" placeholder="Enter Author">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <label class="form-label">Author</label>
+
+                                <label class="d-flex align-items-center gap-1 pin-label">
+                                    <input type="checkbox" id="pinAuthor">
+                                    Pin
+                                </label>
+                            </div>
+                            <input type="text" class="form-control" id="author" list="authorList">
+                            <datalist id="authorList"></datalist>
                         </div>
+
                         <div class="col-md-3">
-                            <label for="illustrator" class="form-label">Illustrator</label>
-                            <input type="text" class="form-control" id="illustrator" placeholder="Enter Illustrator">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <label class="form-label">Illustrator</label>
+
+                                <label class="d-flex align-items-center gap-1 pin-label">
+                                    <input type="checkbox" id="pinIllustrator">
+                                    Pin
+                                </label>
+                            </div>
+                            <input type="text" class="form-control" id="illustrator" list="illustratorList">
+                            <datalist id="illustratorList"></datalist>
                         </div>
+
                         <div class="col-md-3">
-                            <label for="publisher" class="form-label">Publisher</label>
-                            <input type="text" class="form-control" id="publisher" placeholder="Enter Publisher">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <label class="form-label">Publisher</label>
+
+                                <label class="d-flex align-items-center gap-1 pin-label">
+                                    <input type="checkbox" id="pinPublisher">
+                                    Pin
+                                </label>
+                            </div>
+                            <input type="text" class="form-control" id="publisher" list="publisherList">
+                            <datalist id="publisherList"></datalist>
                         </div>
+
                         <div class="col-md-3">
-                            <label for="publicationYear" class="form-label">Publication Year</label>
-                            <input type="text" class="form-control" id="publicationYear" placeholder="Enter Publication Year">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <label class="form-label">Publication Year</label>
+
+                                <label class="d-flex align-items-center gap-1 pin-label">
+                                    <input type="checkbox" id="pinYear">
+                                    Pin
+                                </label>
+                            </div>
+                            <select id="publicationYear" class="form-select"></select>
                         </div>
+
                     </div>
 
                     <!-- Row 3 -->
                     <div class="row mb-3">
+
                         <div class="col-md-3">
-                            <label for="categoryId" class="form-label">Category ID</label>
-                            <input type="text" class="form-control" id="categoryId" placeholder="Enter Category ID">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <label class="form-label">Category</label>
+
+                                <label class="d-flex align-items-center gap-1 pin-label">
+                                    <input type="checkbox" id="pinCategory">
+                                    Pin
+                                </label>
+                            </div>
+                            <select class="form-select" id="categoryId"></select>
                         </div>
+
                         <div class="col-md-3">
-                            <label for="totalCopies" class="form-label">Total Copies</label>
-                            <input type="number" class="form-control" id="totalCopies" placeholder="Total Copies">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <label class="form-label">Total Copies</label>
+
+                                <label class="d-flex align-items-center gap-1 pin-label">
+                                    <input type="checkbox" id="pinCopies">
+                                    Pin
+                                </label>
+                            </div>
+                            <input type="number" class="form-control" id="totalCopies">
                         </div>
+
                         <div class="col-md-3">
-                            <label for="availableCopies" class="form-label">Available Copies</label>
-                            <input type="number" class="form-control" id="availableCopies" placeholder="Available Copies">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <label class="form-label">Shelf Location</label>
+
+                                <label class="d-flex align-items-center gap-1 pin-label">
+                                    <input type="checkbox" id="pinShelf">
+                                    Pin
+                                </label>
+                            </div>
+                            <input type="text" class="form-control" id="shelfLocation">
                         </div>
-                        <div class="col-md-3">
-                            <label for="shelfLocation" class="form-label">Shelf Location</label>
-                            <input type="text" class="form-control" id="shelfLocation" placeholder="Enter Shelf Location">
-                        </div>
+
                     </div>
 
                     <!-- Row 4 -->
                     <div class="row">
-                        <div class="col-md-3">
-                            <label for="keyStage" class="form-label">Key Stage Grade Level</label>
-                            <select class="form-select" id="keyStage" name="keystage">
-                                <option value="">Select Key Stage</option>
 
-                                <option value="KS 1 - Kinder to Grade 3">KS 1 - Kinder to Grade 3</option>
-                                <option value="KS 1 &amp; 2 - Kinder to Grade 6">KS 1 &amp; 2 - Kinder to Grade 6</option>
-                                <option value="KS 2 - Grade 4 to 6">KS 2 - Grade 4 to 6</option>
-                                <option value="KS 4 - Grade 11 to 12">KS 4 - Grade 11 to 12</option>
-                                <option value="KS 3 &amp; 4 - Grade 7 to 12">KS 3 &amp; 4 - Grade 7 to 12</option>
-                                <option value="KS 3 - Grade 7 to 10">KS 3 - Grade 7 to 10</option>
+                        <div class="col-md-3">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <label class="form-label">Key Stage</label>
+
+                                <label class="d-flex align-items-center gap-1 pin-label">
+                                    <input type="checkbox" id="pinKeyStage">
+                                    Pin
+                                </label>
+                            </div>
+                            <select class="form-select" id="keyStage">
                                 <option value="Kinder to Grade 1">Kinder to Grade 1</option>
-                                <option value="KS 2 &amp; 3 - Grade 4 to 10">KS 2 &amp; 3 - Grade 4 to 10</option>
-                                <option value="KS 1 - Kinder at Grade 3">KS 1 - Kinder at Grade 3</option>
+                                <option value="KS 1 - Kinder to Grade 3">KS 1 - Kinder to Grade 3</option>
+                                <option value="KS 1 & 2 - Kinder to Grade 6">KS 1 & 2 - Kinder to Grade 6</option>
+                                <option value="KS 2 - Grade 4 to 6">KS 2 - Grade 4 to 6</option>
+                                <option value="KS 2 & 3 - Grade 4 to 10">KS 2 & 3 - Grade 4 to 10</option>
+                                <option value="KS 3 - Grade 7 to 10">KS 3 - Grade 7 to 10</option>
+                                <option value="KS 3 & 4 - Grade 7 to 12">KS 3 & 4 - Grade 7 to 12</option>
+                                <option value="KS 4 - Grade 11 to 12">KS 4 - Grade 11 to 12</option>
                             </select>
                         </div>
+
                         <div class="col-md-3">
-                            <label for="noOfPages" class="form-label">No. of Pages</label>
-                            <input type="number" class="form-control" id="noOfPages" placeholder="Enter number of pages">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <label class="form-label">No. of Pages</label>
+
+                                <label class="d-flex align-items-center gap-1 pin-label">
+                                    <input type="checkbox" id="pinPages">
+                                    Pin
+                                </label>
+                            </div>
+                            <input type="number" class="form-control" id="noOfPages">
                         </div>
-                        <div class="col-md-3">
-                            <label for="createdAt" class="form-label">Created At</label>
-                            <input type="date" class="form-control" id="createdAt">
-                        </div>
-                        <div class="col-md-3">
-                            <label for="lastUpdated" class="form-label">Last Updated At</label>
-                            <input type="date" class="form-control" id="lastUpdated">
-                        </div>
+
                     </div>
+
                 </form>
             </div>
+
+
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
                 <button type="button" class="btn btn-primary" id="saveBookBtn">Save Book</button>
@@ -195,6 +273,8 @@
 {% block extra_scripts %}
     <script src="{{ url_for('static', filename='js/genreCRUD.js') }}"></script>
     <script src="{{ url_for('static', filename='js/searchBar.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/saveBookForm.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/bookFormProps.js') }}"></script>
     <script>
         document.addEventListener("DOMContentLoaded", async function () {
             await loadGenres();
@@ -219,7 +299,7 @@
                 console.error(err);
             }
         }*/
-
+        //TODO fix genre red text bug
         // FOR THE BOOKS TABLE
         const container = document.getElementById('booksTable');
 
@@ -240,7 +320,7 @@
             "Illustrator",
             "Publisher",
             "Year",
-            "Category",
+            "Genre",
             "Total",
             "Available",
             "Shelf",
@@ -312,15 +392,14 @@
                 data: 'key_stage_grade_level',
                 type: 'dropdown',
                 source: [
+                    "Kinder to Grade 1",
                     "KS 1 - Kinder to Grade 3",
                     "KS 1 & 2 - Kinder to Grade 6",
                     "KS 2 - Grade 4 to 6",
-                    "KS 4 - Grade 11 to 12",
-                    "KS 3 & 4 - Grade 7 to 12",
-                    "KS 3 - Grade 7 to 10",
-                    "Kinder to Grade 1",
                     "KS 2 & 3 - Grade 4 to 10",
-                    "KS 1 - Kinder at Grade 3"
+                    "KS 3 - Grade 7 to 10",
+                    "KS 3 & 4 - Grade 7 to 12",
+                    "KS 4 - Grade 11 to 12"
                 ],
                 strict: true,
                 allowInvalid: false
@@ -360,12 +439,18 @@
                             hot.setDataAtRowProp(row, 'last_updated_at', today, 'internal');
                             return saveField(result.book_id, prop, valueToSave);
                         })
+                        .then(() => {
+                            // 👇 slight delay prevents visual overwrite bug
+                            setTimeout(() => {
+                                refreshTable();
+                            }, 100);
+                        })
                         .catch(console.error);
                 } else {
                     // reload table after editing the total copies to update the accession number
                     saveField(bookId, prop, valueToSave).then(() => {
                         if (prop === 'total_copies') {
-                            loadBooks(); // 👈 reuse your existing reload
+                            refreshTable(); // 👈 reuse your existing reload
                         }
                     });
                 }
@@ -564,43 +649,54 @@
             searchInput.dispatchEvent(new Event('input')); // trigger the input event to refresh the table
         });
 
-        <!-- TODO finish next week -->
-        function collectBookFormData() {
-            return {
-                accession_start: document.getElementById('accessionStart').value.trim(),
-                accession_end: document.getElementById('accessionEnd').value.trim(),
-                isbn: document.getElementById('isbn').value.trim(),
-                title: document.getElementById('title').value.trim(),
+        document.getElementById('refreshTable').addEventListener('click', refreshTable);
 
-                author: document.getElementById('author').value.trim(),
-                illustrator: document.getElementById('illustrator').value.trim(),
-                publisher: document.getElementById('publisher').value.trim(),
-                publication_year: document.getElementById('publicationYear').value.trim(),
-
-                category_id: document.getElementById('categoryId').value.trim(),
-                total_copies: document.getElementById('totalCopies').value,
-                available_copies: document.getElementById('availableCopies').value,
-                shelf_location: document.getElementById('shelfLocation').value.trim(),
-
-                key_stage_grade_level: document.getElementById('keyStage').value,
-                no_of_pages: document.getElementById('noOfPages').value,
-
-                created_at: document.getElementById('createdAt').value,
-                last_updated_at: document.getElementById('lastUpdated').value
-            };
-        }
-        document.getElementById('saveBookBtn').addEventListener('click', () => {
-            const bookData = collectBookFormData();
-
-            console.log(bookData); // 👈 for now
-
-            // later: send to API
-        });
-
-        document.getElementById('refreshTable').addEventListener('click', () => {
+        function refreshTable() {
             loadGenres(); // ensure genres are fresh for the renderer
+            loadCategoryDropdown(); // refresh dropdown options in case genres changed
             loadBooks();
-            console.log('Table refreshed');
+            loadBookFieldDatalists(); // refresh datalists for author, illustrator, publisher  
+            console.log('Table and Genres refreshed');
+        }
+
+        // Reset form function
+        document.getElementById('resetFormBtn').addEventListener('click', resetForm);
+        function resetForm() {
+
+            // 1. turn off batch mode
+            const batchMode = document.getElementById('batchMode');
+            if (batchMode) batchMode.checked = false;
+
+            // 2. clear all inputs (text + number + select)
+            document.querySelectorAll('#addBookForm input, #addBookForm select').forEach(el => {
+
+                if (el.type === 'checkbox') {
+                    el.checked = false; // also clears all pin checkboxes
+                } else {
+                    el.value = "";
+                }
+
+            });
+            document.getElementById("keyStage").selectedIndex = 0;
+
+            console.log("Form reset completed.");
+        }
+
+        document.getElementById("addBookForm").addEventListener("keydown", function (e) {
+
+            // trigger only on Enter (not Shift+Enter, etc.)
+            if (e.key === "Enter") {
+
+                // prevent accidental form submit / page reload
+                e.preventDefault();
+
+                // optional: ignore Enter on textarea if you add one later
+                if (e.target.tagName === "TEXTAREA") return;
+
+                // trigger Save button
+                document.getElementById("saveBookBtn").click();
+            }
+
         });
 
     </script>

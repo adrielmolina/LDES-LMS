@@ -24,58 +24,6 @@ window.genres = [];
 window.genreMap = {};
 window.genreReverseMap = {};
 
-//TODO temporarily removed fix later
-
-
-// old version of loadgenres
-/*
-async function loadGenres() {
-    const tbody = document.querySelector('#genreTable tbody');
-
-    // 👇 show loading state immediately
-    tbody.innerHTML = "<tr><td colspan='2'>Loading...</td></tr>";
-
-    try {
-        const res = await fetch('/api/categories');
-        const result = await res.json();
-
-        
-        // 🔥 ADD THIS BLOCK
-        window.genres = result.data;
-        window.genreMap = {};
-        window.genreReverseMap = {};
-
-        result.data.forEach(g => {
-            window.genreMap[g.category_id] = g.name;
-            window.genreReverseMap[g.name] = g.category_id;
-        });
-        
-        // 👇 clear loading
-        tbody.innerHTML = "";
-
-        result.data.forEach(genre => {
-            const row = document.createElement('tr');
-
-            row.innerHTML = `
-                <td>${genre.name}</td>
-                <td>
-                    <button class="btn btn-sm btn-warning" onclick="editGenre(${genre.category_id}, \`${genre.name}\`)">Edit</button>
-                    <button class="btn btn-sm btn-danger" onclick="deleteGenre(${genre.category_id}, \`${genre.name}\`)">Delete</button>
-                </td>
-            `;
-
-            tbody.appendChild(row);
-        });
-
-    } catch (err) {
-        console.error(err);
-
-        // 👇 show error state
-        tbody.innerHTML = "<tr><td colspan='2'>Failed to load</td></tr>";
-    }
-}
-    
-*/
 
 async function loadGenres() {
     const tbody = document.querySelector('#genreTable tbody');
@@ -153,6 +101,7 @@ async function addGenre() {
 
         input.value = "";
         loadGenres();
+        loadCategoryDropdown()
 
     } catch (err) {
         console.error(err);
@@ -186,6 +135,7 @@ async function editGenre(id, currentName) {
 
         // ✅ refresh from DB
         loadGenres();
+        loadCategoryDropdown()
 
     } catch (err) {
         console.error(err);
@@ -212,6 +162,7 @@ async function deleteGenre(id, name) {
 
         // ✅ refresh table
         loadGenres();
+        loadCategoryDropdown()
 
     } catch (err) {
         console.error(err);
