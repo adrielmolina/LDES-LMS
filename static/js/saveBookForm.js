@@ -1,3 +1,18 @@
+document.addEventListener("DOMContentLoaded", function () {
+    // for auto capitalization of title, author, illustrator, publisher fields
+    ['title', 'author', 'illustrator', 'publisher'].forEach(id => {
+        const el = document.getElementById(id);
+        if (!el) return;
+        el.addEventListener('input', function () {
+            const pos = this.selectionStart; // save cursor position
+            this.value = this.value.replace(/\b\w/g, c => c.toUpperCase());
+            this.setSelectionRange(pos, pos); // restore cursor position
+        });
+    });
+});
+
+
+
 document.getElementById("saveBookBtn").addEventListener("click", async function () {
 
     const batchMode = document.getElementById("batchMode")?.checked;
@@ -50,40 +65,51 @@ document.getElementById("saveBookBtn").addEventListener("click", async function 
         // =========================
         if (batchMode) {
 
-    // always clear these
-    document.getElementById("isbn").value = "";
-    document.getElementById("title").value = "";
+            // always clear these
+            document.getElementById("isbn").value = "";
+            document.getElementById("title").value = "";
 
-    // reset selects properly
-    document.getElementById("keyStage").selectedIndex = 0;
-    await loadCategoryDropdown("");
+            // 👇 only reset keyStage if NOT pinned
+            const pinKeyStage = document.getElementById("pinKeyStage");
+            if (!pinKeyStage?.checked) {
+                document.getElementById("keyStage").selectedIndex = 0;
+            }
 
-    // map fields directly to their pin checkboxes
-    const pinMap = [
-        { input: "author", pin: "pinAuthor" },
-        { input: "illustrator", pin: "pinIllustrator" },
-        { input: "publisher", pin: "pinPublisher" },
-        { input: "publicationYear", pin: "pinYear" },
-        { input: "totalCopies", pin: "pinCopies" },
-        { input: "shelfLocation", pin: "pinShelf" },
-        { input: "noOfPages", pin: "pinPages" }
-    ];
+            // 👇 only reset category if NOT pinned
+            const pinCategory = document.getElementById("pinCategory");
+            console.log('pinCategory checked:', pinCategory?.checked, 'payload.category_id:', payload.category_id);
+            if (!pinCategory?.checked) {
+                await loadCategoryDropdown("");
+            } else {
+                await loadCategoryDropdown(payload.category_id); // reload but keep selected value
+            }
 
-    pinMap.forEach(({ input, pin }) => {
-        const inputEl = document.getElementById(input);
-        const pinEl = document.getElementById(pin);
+            // map fields directly to their pin checkboxes
+            const pinMap = [
+                { input: "author", pin: "pinAuthor" },
+                { input: "illustrator", pin: "pinIllustrator" },
+                { input: "publisher", pin: "pinPublisher" },
+                { input: "publicationYear", pin: "pinYear" },
+                { input: "totalCopies", pin: "pinCopies" },
+                { input: "shelfLocation", pin: "pinShelf" },
+                { input: "noOfPages", pin: "pinPages" }
+            ];
 
-        if (!inputEl) return;
+            pinMap.forEach(({ input, pin }) => {
+                const inputEl = document.getElementById(input);
+                const pinEl = document.getElementById(pin);
 
-        // only clear if NOT pinned
-        if (!pinEl || !pinEl.checked) {
-            inputEl.value = "";
-        }
-    });
+                if (!inputEl) return;
 
-    // focus back to ISBN
-    document.getElementById("isbn")?.focus();
-} else {
+                // only clear if NOT pinned
+                if (!pinEl || !pinEl.checked) {
+                    inputEl.value = "";
+                }
+            });
+
+            // focus back to ISBN
+            document.getElementById("isbn")?.focus();
+        } else {
 
             // NORMAL MODE RESET
             document.getElementById("addBookForm").reset();

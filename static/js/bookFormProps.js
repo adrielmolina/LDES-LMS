@@ -32,9 +32,14 @@ async function loadCategoryDropdown(selectedValue = "") {
 
             categorySelect.appendChild(option);
         });
-
-        // 👇 restore selected value AFTER rebuilding
-        categorySelect.value = currentValue;
+        // genre value to set after loading options
+        if (selectedValue) {
+            categorySelect.value = String(selectedValue);
+            console.log('set value to:', String(selectedValue), 'actual value now:', categorySelect.value);
+        } else {
+            categorySelect.value = "";
+        }
+    
 
     } catch (err) {
         console.error("CATEGORY DROPDOWN ERROR:", err);
@@ -69,6 +74,7 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 
 
+//for the year dropdown
 const yearSelect = document.getElementById("publicationYear");
 const currentYear = new Date().getFullYear();
 

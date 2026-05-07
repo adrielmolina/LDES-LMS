@@ -23,6 +23,9 @@
 
         <!-- Right side -->
         <div class="button-group-right">
+            <button id="exportBorrowsBtn" class="btn btn-success btn-sm">
+                <i class="bi bi-file-earmark-excel"></i> Export to Excel
+            </button>
             <button id="refreshTable" type="button"  class="btn btn-outline-primary">Refresh Table</button>
         </div>
     </div>
@@ -47,7 +50,7 @@
         <label class="form-label">Book ID</label>
         <input id="book_id" type="number" class="form-control" name="book_id" required readonly>
     </div>
-    <!-- TODO add red highlight on overdue -->
+
     <div class="col-md-4">
         <label class="form-label">Book Name *</label>
         <input list="bookList" class="form-control" name="book_name" id="book_name" required autocomplete="off">
@@ -190,6 +193,8 @@
 
 
 {% block extra_scripts %}
+    <script src="https://cdn.jsdelivr.net/npm/exceljs/dist/exceljs.min.js"></script>
+    <script src="{{ url_for('static', filename='js/excelExportsBorrow.js') }}"></script>
     <script src="{{ url_for('static', filename='js/booksList.js') }}"></script>
     <script src="{{ url_for('static', filename='js/borrowActions.js') }}"></script>
     <script src="{{ url_for('static', filename='js/autoOverdue.js') }}"></script>
@@ -206,7 +211,16 @@
                 scrollX: true,
                 columnDefs: [
                     { orderable: false, targets: -1 } // disable sorting on actions
-                ]
+                ],
+                // add red highlight for overdue rows
+                createdRow: function(row, data) {
+                    // status column index = 8
+                    const status = data[8];
+
+                    if (status === 'overdue') {
+                        $(row).addClass('overdue-row');
+                    }
+                }
             });
 
             loadBorrows();
@@ -262,7 +276,6 @@
             const remarks = form?.querySelector('[name="remarks"]');
             if (remarks) remarks.value = "";
         });
-
         // for the datalist in the form
         document.addEventListener('DOMContentLoaded', loadBookDatalist);
         document.getElementById('refreshTable').addEventListener('click', refreshData);
@@ -273,7 +286,7 @@
             console.log("Table and datalist refreshed.");
         }
         
-        // TODO handle case when user types a book name that doesn't exist in the datalist (clear book_id and disable copies input)
+
         //Auto-fill Book ID + set max copies
         const bookInput = document.getElementById('book_name');
         const bookIdInput = document.querySelector('input[name="book_id"]');
@@ -307,7 +320,6 @@
             }
         }
 
-        //TODO add delete transaction function and add a confrmation dialog
 
         // 👇 attach listener
         bookInput.addEventListener('input', updateBookLimiter);

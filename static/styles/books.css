@@ -254,3 +254,11 @@
         max-width: 100%;
     }
 }
+
+/* re-enable copy/paste on handsontable */
+#booksTable .handsontable td,
+#booksTable .handsontable th {
+    -webkit-user-select: text !important;
+    user-select: text !important;
+}
+

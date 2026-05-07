@@ -262,20 +262,51 @@ def get_books():
 def create_book():
     conn = db_conn.conn_init()
     cursor = conn.cursor()
+
     try:
-        today = date.today().isoformat()  # 👈 added
+        data = request.get_json()
+
+        title = data.get("title", "").strip()
+        author = data.get("author", "").strip()
+
+        if not title:
+            return jsonify({"error": "Title is required"}), 400
+
+        today = date.today().isoformat()
+
+        # 🔴 DUPLICATE CHECK (title + author)
         cursor.execute("""
-            INSERT INTO books (created_at, last_updated_at) VALUES (?, ?)
-        """, (today, today))  # 👈 changed from DEFAULT VALUES
+            SELECT book_id
+            FROM books
+            WHERE LOWER(title) = LOWER(?)
+            AND LOWER(author) = LOWER(?)
+        """, (title, author))
+
+        existing = cursor.fetchone()
+
+        if existing:
+            return jsonify({
+                "error": "Book with same title and author already exists",
+                "book_id": existing["book_id"]
+            }), 409
+
+        # ✅ INSERT NEW BOOK
+        cursor.execute("""
+            INSERT INTO books (title, author, created_at, last_updated_at)
+            VALUES (?, ?, ?, ?)
+        """, (title, author, today, today))
+
         conn.commit()
-        book_id = cursor.lastrowid
+
         return jsonify({
             "success": True,
-            "book_id": book_id
+            "book_id": cursor.lastrowid
         })
+
     except Exception as e:
         print("DB ERROR:", e)
         return jsonify({"error": str(e)}), 500
+
     finally:
         conn.close()
 
@@ -308,10 +339,10 @@ def create_book_form():
             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         """, (
             data.get("isbn", ""),
-            data.get("title", ""),
-            data.get("author", ""),
-            data.get("illustrator", ""),
-            data.get("publisher", ""),
+            data.get("title", "").strip().title(),
+            data.get("author", "").strip().title(),
+            data.get("illustrator", "").strip().title(),
+            data.get("publisher", "").strip().title(),
             data.get("publication_year", ""),
             data.get("category_id", ""),
             data.get("total_copies", 40),  # default
@@ -340,8 +371,7 @@ def create_book_form():
     finally:
         conn.close()
 
-# TODO auto set the available to [total_copies] when adding new books,
-# TODO handle editing total_copies (if adding or removing, recompute available_copies accordingly by including ongoing borrowed copies in the calculation)
+
 @server.route("/api/books/<int:book_id>", methods=["PUT"])
 def update_book(book_id):
     data = request.get_json()
@@ -364,6 +394,26 @@ def update_book(book_id):
     conn = db_conn.conn_init()
     cursor = conn.cursor()
     try:
+        # handle total_copies validation
+        if field == "total_copies":
+
+            # current active borrowed count
+            cursor.execute("""
+                SELECT COALESCE(SUM(no_of_copies), 0)
+                FROM circulations
+                WHERE book_id = ?
+                AND status IN ('borrowed', 'overdue')
+            """, (book_id,))
+
+            borrowed = cursor.fetchone()[0] or 0
+
+            # prevent invalid totals
+            if int(value) < borrowed:
+                return jsonify({
+                    "error": f"Cannot set total copies below currently borrowed copies ({borrowed})."
+                }), 400
+        
+        
         today = date.today().isoformat()  # 👈 added
         query = f"UPDATE books SET {field} = ?, last_updated_at = ? WHERE book_id = ?"  # 👈 changed
         cursor.execute(query, (value, today, book_id))  # 👈 changed

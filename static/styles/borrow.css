@@ -35,3 +35,9 @@
     display: flex;
     gap: 0.5rem;
 }
+
+.overdue-row td {
+    background-color: #ffe5e5 !important;
+    color: #4f2323;
+    font-weight: 500;
+}

@@ -9,8 +9,6 @@
 
 {% block content %}
 <div class="module-container">
-    <!-- TODO add duplicate book check -->
-    <!-- TODO check the genre on batch add. its still retaining data even when not pinned -->
     <div id="buttons_container" class="buttons_container">
         <!-- Left side -->
         <div class="button-group-left">
@@ -18,7 +16,7 @@
             <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#genreOverlayModal" onclick="loadGenres()">Add Genre (Ctrl + 2)</button>
         </div>
 
-
+        
         <div class="search-wrapper">
             <div class="search-box">
                 <span class="search-icon">🔍</span>
@@ -31,6 +29,9 @@
 
         <!-- Right side -->
         <div class="button-group-right">
+            <button id="exportExcelBtn" class="btn btn-success btn-sm">
+                <i class="bi bi-file-earmark-excel"></i> Export to Excel
+            </button>
             <button id="refreshTable" type="button" class="btn btn-outline-primary">Refresh Table</button>
         </div>
     </div>
@@ -261,17 +262,17 @@
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
                 <button type="button" class="btn btn-primary" id="saveBookBtn">Save Book</button>
-                <!-- TODO disable when empty -->
             </div>
         </div>
     </div>
 </div>
-
     <div id="booksTable"></div>
 </div>
 {% endblock %}
 
 {% block extra_scripts %}
+    <script src="https://cdn.jsdelivr.net/npm/exceljs/dist/exceljs.min.js"></script>
+    <script src="{{ url_for('static', filename='js/exportExcelBooks.js') }}"></script>
     <script src="{{ url_for('static', filename='js/genreCRUD.js') }}"></script>
     <script src="{{ url_for('static', filename='js/searchBar.js') }}"></script>
     <script src="{{ url_for('static', filename='js/saveBookForm.js') }}"></script>
@@ -300,7 +301,6 @@
                 console.error(err);
             }
         }*/
-        //TODO fix genre red text bug
         // FOR THE BOOKS TABLE
         const container = document.getElementById('booksTable');
 
@@ -315,9 +315,9 @@
             "Book ID",
             "Accession # Start",
             "Accession # End",
-            "ISBN",
             "Title",
             "Author",
+            "ISBN",
             "Illustrator",
             "Publisher",
             "Year",
@@ -335,7 +335,6 @@
             { data: 'book_id', readOnly: true },
             { data: 'accession_no_start', readOnly: true},
             { data: 'accession_no_end', readOnly: true},
-            { data: 'isbn' },
             { data: 'title' },
             //{ data: 'author' },
             //{ data: 'illustrator' },
@@ -348,6 +347,7 @@
                 process([...new Set(values)]);
                 }
             },
+            { data: 'isbn' },
             {
                 data: 'illustrator',
                 type: 'autocomplete',
@@ -370,14 +370,16 @@
                 type: 'dropdown',
                 source: [],
                 renderer: function (instance, td, row, col, prop, value) {
-                    console.log('RENDERER value:', value, typeof value, 'genreMap:', JSON.stringify(window.genreMap));
+                    // 👇 run the base renderer first — handles selection, highlighting, etc.
+                    Handsontable.renderers.BaseRenderer.apply(this, arguments);
+                    
                     const name = window.genreMap?.[Number(value)] || null;
-                    if (!name && value) {
+                    if (value && !name) {
                         td.innerText = `Unknown (ID: ${value})`;
-                        td.style.color = '';
+                        td.style.color = 'red';
                     } else {
                         td.innerText = name || '';
-                        td.style.color = '';  // 👈 don't forget this reset
+                        td.style.color = '';
                     }
                     return td;
                 }
@@ -407,7 +409,6 @@
             },
             { data: 'no_of_pages', type: 'numeric' }
         ],
-        
         afterChange: function (changes, source) {
             
             if (!changes || source === 'loadData' || source === 'internal') return;
@@ -416,6 +417,17 @@
                 if (oldVal === newVal) return;
 
                 let valueToSave = newVal;
+
+                // auto capitalize
+                const capitalizeFields = ['title', 'author', 'illustrator', 'publisher', 'shelf_location'];
+                if (capitalizeFields.includes(prop) && typeof newVal === 'string') {
+                    const capitalized = newVal.replace(/\b\w/g, c => c.toUpperCase());
+                    if (capitalized !== newVal) {
+                        hot.setDataAtRowProp(row, prop, capitalized, 'internal');
+                        valueToSave = capitalized;
+                    }
+                }
+
                 if (prop === 'category_id' && window.genreReverseMap?.[newVal]) {
                     valueToSave = window.genreReverseMap[newVal];
                     console.log('newVal:', newVal, 'valueToSave:', valueToSave); // 👈 inside forEach
@@ -429,10 +441,22 @@
                 let bookId = hot.getDataAtRowProp(row, 'book_id');
 
                 if (!bookId) {
-                    fetch('/api/books', { method: 'POST' })
+                    fetch('/api/books', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            title: hot.getDataAtRowProp(row, 'title') || "",
+                            author: hot.getDataAtRowProp(row, 'author') || ""
+                        })
+                    })
                         .then(r => r.json())
                         .then(result => {
-                            if (result.error) { console.error(result.error); return; }
+                            if (result.error) { 
+                                console.error(result.error);
+                                alert('Failed to create book: ' + result.error);
+                                return;} //runs twice for some reason lol
                             hot.setDataAtRowProp(row, 'book_id', result.book_id, 'internal');
                             // 👇 set created_at and last_updated_at on new row
                             const today = new Date().toISOString().split('T')[0];
@@ -499,8 +523,11 @@
             const selected = this.getSelectedLast();
             if (!selected) return;
 
+            // 👇 allow all ctrl/cmd shortcuts through (copy, paste, select all, undo etc.)
+            if (e.ctrlKey || e.metaKey) return;
+
             const col = selected[1];
-            const numericCols = [1, 2, 3, 8, 10, 11, 16]; // accession_start, accession_end, isbn, year, total, available, pages
+            const numericCols = [1, 2, 5, 8, 10, 11, 16]; // accession_start, accession_end, isbn, year, total, available, pages
 
             if (numericCols.includes(col)) {
                 const allowed = ['Backspace', 'Delete', 'ArrowLeft', 'ArrowRight', 'Tab', 'Enter'];
@@ -531,7 +558,7 @@
         height: '100%',
         hiddenColumns: {
           columns: [13,14], // indexes of columns you want hidden
-          indicators: false   // optional: hides little UI markers
+          indicators: true   // optional: hides little UI markers
         },
 
 
@@ -549,10 +576,14 @@
             })
             .then(r => r.json())
             .then(result => {
-                if (result.error) { console.error(result.error); return; }
+                if (result.error) { 
+                    console.error(result.error);
+                    alert('Failed to save: ' + result.error);
+                    return; 
+                }
                 // 👇 update last_updated_at in the table
                 const today = new Date().toISOString().split('T')[0];
-                const rowIndex = hot.getSourceData().findIndex(r => r.book_id === bookId);
+                const rowIndex = hot.getSourceData().findIndex(r => String(r.book_id) === String(bookId));
                 if (rowIndex !== -1) {
                     hot.setDataAtRowProp(rowIndex, 'last_updated_at', today, 'internal');
                 }
@@ -560,7 +591,6 @@
             .catch(console.error);
         }
 
-        //TODO add filter for punctuations ex. slash and backslash, causes error on deletion
         // FOR THE GENRE;
         const genreModal = document.getElementById('genreOverlayModal');
         const searchInput = document.getElementById('genreSearch');
@@ -608,6 +638,12 @@
 
         function capitalizeWords(str) {
             return str
+                // remove slash + backslash
+                .replace(/[\\/]/g, '')
+
+                // optional: remove other problematic symbols
+                .replace(/[<>:"|?*]/g, '')
+
                 .toLowerCase()
                 .trim()
                 .split(/\s+/)

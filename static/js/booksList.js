@@ -1,5 +1,6 @@
 let bookMap = {};
 
+// for the dropdown on book title
 async function loadBookDatalist() {
     const res = await fetch('/api/books');
     const result = await res.json();

@@ -347,12 +347,6 @@ textarea,
     border-color: #dcdcdc !important;
 }
 
-/* ===== READONLY ===== */
-.handsontable td.htDimmed,
-.handsontable td[class*="htDimmed"] {
-    background: #d3d3d3 !important;
-    color: #000000 !important;
-}
 
 /* ===== ACTIVE CELL / EDIT FIX ===== */
 .handsontable td.area.current,
@@ -428,7 +422,7 @@ textarea,
 
 /* Selection highlight */
 #booksTable .handsontable td.area {
-    background: rgba(33, 115, 70, 0.15) !important;
+    background: rgba(33, 115, 70, 0.2) !important;
 }
 
 /* Filter dropdown arrow */
@@ -453,4 +447,61 @@ textarea,
     accent-color: #217346;
 }
 
+/* Selected row highlight */
+#booksTable .handsontable td.area {
+    background: rgba(33, 115, 70, 0.15) !important;
+}
 
+/* Current selected cell */
+#booksTable .handsontable td.current {
+    background: rgba(33, 115, 70, 0.1) !important;
+}
+
+/* Override the default pink/salmon HOT selection */
+.handsontable tbody tr td.highlight,
+.handsontable tbody tr td.ht__highlight {
+    background: rgba(33, 115, 70, 0.15) !important;
+}
+
+
+/* Override Bootstrap invalid styles on HOT cells */
+#booksTable .handsontable td,
+#booksTable .handsontable td:focus,
+#booksTable .handsontable td.is-invalid,
+#booksTable .handsontable td[aria-invalid] {
+    background-color: #ffffff !important;
+    border-color: #dcdcdc !important;
+}
+
+
+/* Override Bootstrap invalid styles on HOT cells */
+#booksTable .handsontable td,
+#booksTable .handsontable td:focus,
+#booksTable .handsontable td.is-invalid,
+#booksTable .handsontable td[aria-invalid] {
+    background-color: #ffffff !important;
+    border-color: #dcdcdc !important;
+}
+
+/* for the readonly fields */
+#booksTable .handsontable td.htDimmed {
+    background-color: #d3d3d3 !important;
+    color: #000000 !important;
+}
+
+#booksTable .handsontable tr:nth-child(even) td {
+    background-color: #f0f7f4 !important;  /* very light green */
+}
+
+#booksTable .handsontable tr:nth-child(odd) td {
+    background-color: #ffffff !important;
+}
+
+/* keep readonly cells distinct on both row colors */
+#booksTable .handsontable tr:nth-child(even) td.htDimmed {
+    background-color: #e8e8e8 !important;
+}
+
+#booksTable .handsontable tr:nth-child(odd) td.htDimmed {
+    background-color: #d3d3d3 !important;
+}
