@@ -227,8 +227,8 @@
 }
 
 .badge-event {
-  width: 4px;
-  height: 4px;
+  width: 8px;
+  height: 8px;
   border-radius: 50%;
 }
 
@@ -382,26 +382,6 @@
   display: flex;
   gap: 10px;
   flex-wrap: wrap;
-}
-
-/* Quick reserve button */
-.btn-reserve {
-  width: 100%;
-  padding: 9px 16px;
-  background: var(--accent);
-  color: white;
-  border: none;
-  border-radius: var(--radius-md);
-  font-size: 13px;
-  font-weight: 500;
-  cursor: pointer;
-  transition: background 0.2s ease, transform 0.15s ease;
-  flex-shrink: 0;
-}
-
-.btn-reserve:hover {
-  background: var(--accent-strong);
-  transform: translateY(-1px);
 }
 
 /* =========================

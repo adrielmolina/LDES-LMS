@@ -440,6 +440,211 @@ def delete_book(book_id):
         return jsonify({"error": str(e)}), 500
     finally:
         conn.close()
+        
+###########? -------------------- DASHBOARD ROUTES -------------------- ?#
+@server.route("/api/dashboard/stats", methods=["GET"])
+def get_dashboard_stats():
+    """Get dashboard statistics for the 3 cards"""
+    conn = db_conn.conn_init()
+    cursor = conn.cursor()
+    
+    try:
+        # 1. Total books (sum of all copies)
+        cursor.execute("""
+            SELECT COALESCE(SUM(total_copies), 0) as total
+            FROM books
+        """)
+        total_books = cursor.fetchone()[0] or 0
+        
+        # 2. Total borrowed books (currently borrowed + currently overdue)
+        cursor.execute("""
+            SELECT COALESCE(SUM(no_of_copies), 0) as total
+            FROM circulations
+            WHERE status IN ('borrowed', 'overdue')
+        """)
+        total_borrowed = cursor.fetchone()[0] or 0
+        
+        # 3. Total currently overdue books (NOT returned yet)
+        # This only counts books with status = 'overdue'
+        cursor.execute("""
+            SELECT COALESCE(SUM(no_of_copies), 0) as total
+            FROM circulations
+            WHERE status = 'overdue'
+        """)
+        total_overdue = cursor.fetchone()[0] or 0
+        
+        # Additional check: Also count books past due date but status not updated
+        # This ensures accuracy even if the status hasn't been updated
+        cursor.execute("""
+            SELECT COALESCE(SUM(no_of_copies), 0) as total
+            FROM circulations
+            WHERE status IN ('borrowed', 'overdue')
+            AND due_date < DATE('now')
+            AND return_date IS NULL
+        """)
+        actually_overdue = cursor.fetchone()[0] or 0
+        
+        # Use the larger count to be safe
+        final_overdue = max(total_overdue, actually_overdue)
+        
+        # 4. New books added this week (for trend)
+        cursor.execute("""
+            SELECT COUNT(*) as total
+            FROM books
+            WHERE created_at >= DATE('now', '-7 days')
+        """)
+        weekly_new_books = cursor.fetchone()[0] or 0
+        
+        # 5. New borrows this week (for trend)
+        cursor.execute("""
+            SELECT COALESCE(SUM(no_of_copies), 0) as total
+            FROM circulations
+            WHERE borrow_date >= DATE('now', '-7 days')
+            AND status IN ('borrowed', 'overdue')
+        """)
+        weekly_borrowed = cursor.fetchone()[0] or 0
+        
+        # 6. Overdue change (compare to last week)
+        cursor.execute("""
+            SELECT COALESCE(SUM(no_of_copies), 0) as total
+            FROM circulations
+            WHERE status = 'overdue'
+            AND due_date BETWEEN DATE('now', '-14 days') AND DATE('now', '-7 days')
+        """)
+        overdue_last_week = cursor.fetchone()[0] or 0
+        
+        overdue_change = final_overdue - overdue_last_week
+        
+        return jsonify({
+            "success": True,
+            "data": {
+                "total_books": total_books,
+                "total_borrowed": total_borrowed,
+                "total_overdue": final_overdue,  # Only currently overdue
+                "weekly_new_books": weekly_new_books,
+                "weekly_borrowed": weekly_borrowed,
+                "overdue_change": overdue_change
+            }
+        })
+        
+    except Exception as e:
+        print(f"Dashboard stats error: {e}")
+        import traceback
+        traceback.print_exc()
+        return jsonify({"error": str(e)}), 500
+    finally:
+        conn.close()
+
+
+@server.route("/api/dashboard/calendar", methods=["GET"])
+def get_calendar_events():
+    """Get all due dates for calendar highlighting"""
+    year = request.args.get('year', type=int)
+    month = request.args.get('month', type=int)
+    
+    if not year or not month:
+        return jsonify({"error": "Year and month required"}), 400
+    
+    conn = db_conn.conn_init()
+    cursor = conn.cursor()
+    
+    try:
+        # Get all due dates for this month (no user filtering for now)
+        cursor.execute("""
+            SELECT 
+                c.book_id,
+                c.due_date,
+                c.status,
+                c.student_name,
+                c.no_of_copies,
+                b.title
+            FROM circulations c
+            LEFT JOIN books b ON c.book_id = b.book_id
+            WHERE c.status IN ('borrowed', 'overdue')
+            AND c.due_date IS NOT NULL
+            AND strftime('%Y', c.due_date) = ?
+            AND strftime('%m', c.due_date) = ?
+            ORDER BY c.due_date ASC
+        """, (str(year), f"{month:02d}"))
+        
+        events = []
+        for row in cursor.fetchall():
+            events.append({
+                "date": row["due_date"],
+                "title": row["title"] or f"Book #{row['book_id']}",
+                "status": row["status"],
+                "copies": row["no_of_copies"],
+                "borrower": row["student_name"]
+            })
+        
+        return jsonify({
+            "success": True,
+            "events": events
+        })
+        
+    except Exception as e:
+        print(f"Calendar error: {e}")
+        return jsonify({"error": str(e)}), 500
+    finally:
+        conn.close()
+
+
+@server.route("/api/dashboard/notifications", methods=["GET"])
+def get_notifications():
+    """Get notifications for a specific date"""
+    date_str = request.args.get('date')  # YYYY-MM-DD
+    
+    if not date_str:
+        return jsonify({"error": "Date required"}), 400
+    
+    conn = db_conn.conn_init()
+    cursor = conn.cursor()
+    
+    try:
+        # Get due dates matching this date
+        cursor.execute("""
+            SELECT 
+                c.id,
+                c.book_id,
+                c.due_date,
+                c.status,
+                c.no_of_copies,
+                c.student_name,
+                b.title,
+                b.author
+            FROM circulations c
+            LEFT JOIN books b ON c.book_id = b.book_id
+            WHERE c.due_date = ?
+            AND c.status IN ('borrowed', 'overdue')
+            ORDER BY c.status DESC
+        """, (date_str,))
+        
+        notifications = []
+        for row in cursor.fetchall():
+            notifications.append({
+                "id": row["id"],
+                "type": "due_date" if row["status"] == "borrowed" else "overdue",
+                "title": row["title"] or "Unknown Book",
+                "author": row["author"] or "Unknown Author",
+                "borrower": row["student_name"],
+                "due_date": row["due_date"],
+                "copies": row["no_of_copies"],
+                "message": f"'{row['title']}' is due today!" if row["status"] == "borrowed" 
+                          else f"'{row['title']}' is OVERDUE!"
+            })
+        
+        return jsonify({
+            "success": True,
+            "notifications": notifications,
+            "count": len(notifications)
+        })
+        
+    except Exception as e:
+        print(f"Notifications error: {e}")
+        return jsonify({"error": str(e)}), 500
+    finally:
+        conn.close()
+
 
 ###########? -------------------- BORROW ROUTES -------------------- ?#
 
