@@ -20,8 +20,8 @@
         </svg>
       </div>
       <div class="stat-body">
-        <p class="stat-label">Total borrowed</p>
-        <p class="stat-value" id="totalBorrowedStat">0</p>
+        <p class="stat-label">Total books</p>
+        <p class="stat-value" id="totalBooksStat">0</p>
         <span class="stat-trend stat-trend--up">+2 this week</span>
       </div>
     </div>
@@ -34,8 +34,8 @@
         </svg>
       </div>
       <div class="stat-body">
-        <p class="stat-label">Total overdue books</p>
-        <p class="stat-value" id="totalOverdueStat">0</p>
+        <p class="stat-label">Total borrowed books</p>
+        <p class="stat-value" id="totalBorrowedStat">0</p>
         <span class="stat-trend stat-trend--down">needs return</span>
       </div>
     </div>
@@ -48,8 +48,8 @@
         </svg>
       </div>
       <div class="stat-body">
-        <p class="stat-label">Reservations</p>
-        <p class="stat-value" id="totalReservationsStat">0</p>
+        <p class="stat-label">Total overdue books</p>
+        <p class="stat-value" id="totalOverdueStat">0</p>
         <span class="stat-trend stat-trend--up">pending pickup</span>
       </div>
     </div>
@@ -92,7 +92,6 @@
           <span>Click any calendar day to see details</span>
         </div>
       </div>
-      <button class="btn-reserve" id="quickReserveBtn">+ Quick reservation</button>
     </div>
 
   </div>
@@ -101,4 +100,5 @@
 
 {% block extra_scripts %}
   <script src="{{ url_for('static', filename='js/calendar.js') }}"></script>
+  <script src="{{ url_for('static', filename='js/dashboard.js') }}"></script>
 {% endblock %}

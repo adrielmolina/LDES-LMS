@@ -1,26 +1,14 @@
 /**
- * Library Calendar Manager
- * Handles calendar rendering, events management, and library reservations
- * No external dependencies - fully offline compatible
+ * Library Calendar Manager - Connected to Real Database
  */
 
 class LibraryCalendar {
     constructor() {
-        // Mock library events data
-        this.libraryEvents = [
-            { id: 1, title: "The Midnight Library", type: "borrowed", dueDate: "2026-03-25", patron: "Emma Watson", bookTitle: "The Midnight Library" },
-            { id: 2, title: "Dune", type: "borrowed", dueDate: "2026-03-28", patron: "Paul Atreides", bookTitle: "Dune" },
-            { id: 3, title: "Project Hail Mary", type: "borrowed", dueDate: "2026-03-30", patron: "Ryland Grace", bookTitle: "Project Hail Mary" },
-            { id: 4, title: "Atomic Habits", type: "overdue", dueDate: "2026-03-10", patron: "James Clear", bookTitle: "Atomic Habits", overdueDays: 13 },
-            { id: 5, title: "The Great Gatsby", type: "overdue", dueDate: "2026-03-05", patron: "Nick Carraway", bookTitle: "The Great Gatsby", overdueDays: 18 },
-            { id: 6, title: "Sapiens", type: "reservation", dueDate: "2026-04-02", patron: "Yuval Noah", bookTitle: "Sapiens (hold)" },
-            { id: 7, title: "Klara and the Sun", type: "reservation", dueDate: "2026-04-05", patron: "Kathy H.", bookTitle: "Klara and the Sun" },
-            { id: 8, title: "The Seven Husbands", type: "reservation", dueDate: "2026-04-10", patron: "Evelyn Hugo", bookTitle: "The Seven Husbands of Evelyn Hugo" },
-            { id: 9, title: "Circe", type: "borrowed", dueDate: "2026-03-27", patron: "Madeline Miller", bookTitle: "Circe" }
-        ];
+        this.currentDate = new Date();
+        this.selectedDateStr = null;
         
-        this.currentDate = new Date(2026, 2, 20);
-        this.selectedDateStr = "2026-03-20";
+        const today = new Date();
+        this.selectedDateStr = this.formatYMD(today);
         
         this.init();
     }
@@ -32,49 +20,74 @@ class LibraryCalendar {
         return `${y}-${m}-${d}`;
     }
     
-    updateStats() {
-        const borrowed = this.libraryEvents.filter(e => e.type === "borrowed").length;
-        const overdue = this.libraryEvents.filter(e => e.type === "overdue").length;
-        const reservations = this.libraryEvents.filter(e => e.type === "reservation").length;
-        
-        const totalBorrowedElem = document.getElementById("totalBorrowedStat");
-        const totalOverdueElem = document.getElementById("totalOverdueStat");
-        const totalReservationsElem = document.getElementById("totalReservationsStat");
-        
-        if (totalBorrowedElem) totalBorrowedElem.innerText = borrowed;
-        if (totalOverdueElem) totalOverdueElem.innerText = overdue;
-        if (totalReservationsElem) totalReservationsElem.innerText = reservations;
+    async loadEventsForMonth(year, month) {
+        try {
+            const response = await fetch(`/api/dashboard/calendar?year=${year}&month=${month + 1}`);
+            const data = await response.json();
+            
+            if (data.success) {
+                return data.events;
+            } else {
+                console.error('API error:', data.error);
+                return [];
+            }
+        } catch (error) {
+            console.error('Error loading calendar events:', error);
+            return [];
+        }
     }
     
-    getEventsForDate(ymd) {
-        return this.libraryEvents.filter(ev => ev.dueDate === ymd);
+    async getEventsForDate(ymd) {
+        try {
+            const response = await fetch(`/api/dashboard/notifications?date=${ymd}`);
+            const data = await response.json();
+            
+            if (data.success) {
+                return data.notifications.map(notif => ({
+                    id: notif.id,
+                    title: notif.title,
+                    type: notif.type === 'due_date' ? 'borrowed' : 'overdue',
+                    dueDate: notif.due_date,
+                    patron: notif.borrower || 'Unknown',
+                    bookTitle: notif.title,
+                    author: notif.author,
+                    message: notif.message
+                }));
+            }
+            return [];
+        } catch (error) {
+            console.error('Error loading notifications:', error);
+            return [];
+        }
     }
     
-    getEventMapForMonth(year, month) {
+    getEventMapForMonth(events, year, month) {
         const map = new Map();
         
-        this.libraryEvents.forEach(ev => {
-            const evDate = ev.dueDate;
+        events.forEach(ev => {
+            const evDate = ev.date;
             if (!evDate) return;
             
             const [y, m, d] = evDate.split('-').map(Number);
             if (y === year && m === month + 1) {
                 if (!map.has(evDate)) {
-                    map.set(evDate, { overdue: false, borrowed: false, reservation: false });
+                    map.set(evDate, { overdue: false, borrowed: false });
                 }
                 const entry = map.get(evDate);
-                if (ev.type === 'overdue') entry.overdue = true;
-                if (ev.type === 'borrowed') entry.borrowed = true;
-                if (ev.type === 'reservation') entry.reservation = true;
+                if (ev.status === 'overdue') entry.overdue = true;
+                if (ev.status === 'borrowed') entry.borrowed = true;
             }
         });
         
         return map;
     }
     
-    renderCalendar() {
+    async renderCalendar() {
         const year = this.currentDate.getFullYear();
         const month = this.currentDate.getMonth();
+        
+        const events = await this.loadEventsForMonth(year, month);
+        
         const firstDayOfMonth = new Date(year, month, 1);
         const startWeekday = firstDayOfMonth.getDay();
         const daysInMonth = new Date(year, month + 1, 0).getDate();
@@ -82,6 +95,7 @@ class LibraryCalendar {
         const prevMonthDays = new Date(year, month, 0).getDate();
         const calendarCells = [];
         
+        // Previous month days
         for (let i = startWeekday - 1; i >= 0; i--) {
             const dayNum = prevMonthDays - i;
             const dateObj = new Date(year, month - 1, dayNum);
@@ -89,6 +103,7 @@ class LibraryCalendar {
             calendarCells.push({ date: ymd, day: dayNum, isCurrentMonth: false, isToday: false });
         }
         
+        // Current month days
         const todayYMD = this.formatYMD(new Date());
         for (let d = 1; d <= daysInMonth; d++) {
             const ymd = `${year}-${String(month + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
@@ -96,6 +111,7 @@ class LibraryCalendar {
             calendarCells.push({ date: ymd, day: d, isCurrentMonth: true, isToday });
         }
         
+        // Next month days
         const remaining = 42 - calendarCells.length;
         for (let i = 1; i <= remaining; i++) {
             const dateObj = new Date(year, month + 1, i);
@@ -103,13 +119,14 @@ class LibraryCalendar {
             calendarCells.push({ date: ymd, day: i, isCurrentMonth: false, isToday: false });
         }
         
-        const eventMap = this.getEventMapForMonth(year, month);
+        const eventMap = this.getEventMapForMonth(events, year, month);
         const gridContainer = document.getElementById("calendarDaysGrid");
         if (!gridContainer) return;
         
         gridContainer.innerHTML = "";
         
         calendarCells.forEach(cell => {
+            // Use the exact class names from your CSS
             const dayDiv = document.createElement("div");
             dayDiv.className = "day-cell";
             if (!cell.isCurrentMonth) dayDiv.classList.add("other-month");
@@ -133,15 +150,9 @@ class LibraryCalendar {
                 }
                 if (evInfo.borrowed) {
                     const dot = document.createElement("span");
-                    dot.className = "badge-event badge-borrow";
-                    dot.title = "Active borrowed";
-                    indicatorDiv.appendChild(dot);
-                }
-                if (evInfo.reservation) {
-                    const dot = document.createElement("span");
                     dot.className = "badge-event";
-                    dot.style.backgroundColor = "#f4b942";
-                    dot.title = "Reservation";
+                    dot.style.backgroundColor = "#e36c4a"; // Match legend-dot--due color
+                    dot.title = "Due date";
                     indicatorDiv.appendChild(dot);
                 }
                 
@@ -164,148 +175,153 @@ class LibraryCalendar {
         }
     }
     
-    onDateSelect(dateYMD) {
+    async onDateSelect(dateYMD) {
         this.selectedDateStr = dateYMD;
-        const eventsOnDate = this.getEventsForDate(dateYMD);
+        const eventsOnDate = await this.getEventsForDate(dateYMD);
         const container = document.getElementById("eventsListContainer");
+        const eventsCountBadge = document.getElementById("eventsCount");
         
         if (!container) return;
         
         if (eventsOnDate.length === 0) {
             container.innerHTML = `
-                <div class="empty-notify">
-                    <span style="font-size: 2rem;">📅</span>
-                    <p>No reservations, borrowed or overdue on this date.</p>
-                    <small class="text-muted">Click "New reservation" to add a hold.</small>
+                <div class="notif-empty">
+                    <div class="notif-empty-icon">
+                        <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <rect x="3" y="4" width="18" height="18" rx="2" stroke="currentColor" stroke-width="1.5"/>
+                            <path d="M16 2V6M8 2V6M3 10H21M8 14H10M12 14H14M8 17H10" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+                        </svg>
+                    </div>
+                    <p>No events</p>
+                    <span>No due dates or overdue books for this day</span>
                 </div>`;
+            if (eventsCountBadge) eventsCountBadge.innerText = "0";
             return;
         }
         
-        const sorted = [...eventsOnDate].sort((a, b) => {
-            const order = { overdue: 1, borrowed: 2, reservation: 3 };
-            return order[a.type] - order[b.type];
-        });
+        if (eventsCountBadge) eventsCountBadge.innerText = eventsOnDate.length;
         
-        let html = `<div class="px-3 pt-2 pb-1"><small class="text-muted">📅 ${this.formatDisplayDate(dateYMD)}</small></div>`;
+        const formattedDate = this.formatDisplayDate(dateYMD);
         
-        sorted.forEach(ev => {
+        let html = `<div style="padding: 0 0 12px 0;"><small class="text-muted">📅 ${formattedDate}</small></div>`;
+        html += `<div class="notification-list">`;
+        
+        eventsOnDate.forEach(ev => {
             let badgeClass = "";
             let badgeText = "";
-            let extraDetail = "";
             
             if (ev.type === "overdue") {
                 badgeClass = "overdue";
                 badgeText = "OVERDUE";
-                extraDetail = `<span>⏰ Due: ${ev.dueDate}</span>`;
-            } else if (ev.type === "borrowed") {
+            } else if (ev.type === "due_date") {
                 badgeClass = "borrowed";
-                badgeText = "BORROWED";
-                extraDetail = `<span>👤 ${ev.patron}</span><span>↩️ Due: ${ev.dueDate}</span>`;
-            } else if (ev.type === "reservation") {
-                badgeClass = "";
-                badgeText = "RESERVATION";
-                extraDetail = `<span>✓ ${ev.patron}</span><span>📅 Hold until ${ev.dueDate}</span>`;
+                badgeText = "DUE TODAY";
             }
             
             html += `
                 <div class="event-item">
                     <div class="event-title">
-                        <span>📖 ${ev.bookTitle}</span>
+                        <span>📖 ${this.escapeHtml(ev.bookTitle)}</span>
                         <span class="event-badge ${badgeClass}">${badgeText}</span>
                     </div>
                     <div class="event-detail">
-                        ${extraDetail}
+                        ${ev.author ? `<span>✍️ ${this.escapeHtml(ev.author)}</span>` : ''}
+                        ${ev.patron ? `<span>👤 ${this.escapeHtml(ev.patron)}</span>` : ''}
+                        <span>📅 Due: ${ev.dueDate}</span>
                     </div>
-                    ${ev.type === 'overdue' ? '<div class="text-danger small mt-1">⚠️ Overdue fee may apply</div>' : ''}
                 </div>
             `;
         });
         
+        html += `</div>`;
         container.innerHTML = html;
     }
     
     formatDisplayDate(ymd) {
         const [y, m, d] = ymd.split('-');
         const dateObj = new Date(y, m - 1, d);
-        return dateObj.toLocaleDateString('en-US', { weekday: 'long', month: 'short', day: 'numeric', year: 'numeric' });
+        return dateObj.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' });
     }
     
-    prevMonth() {
+    escapeHtml(text) {
+        if (!text) return '';
+        const div = document.createElement('div');
+        div.textContent = text;
+        return div.innerHTML;
+    }
+    
+    async prevMonth() {
         this.currentDate.setMonth(this.currentDate.getMonth() - 1);
-        this.renderCalendar();
+        await this.renderCalendar();
         
-        const eventsForPrevSelected = this.getEventsForDate(this.selectedDateStr);
-        if (eventsForPrevSelected.length > 0 || this.selectedDateStr.startsWith(this.currentDate.getFullYear() + "-" + String(this.currentDate.getMonth() + 1).padStart(2, '0'))) {
-            this.onDateSelect(this.selectedDateStr);
+        const monthStr = String(this.currentDate.getMonth() + 1).padStart(2, '0');
+        if (this.selectedDateStr && this.selectedDateStr.startsWith(`${this.currentDate.getFullYear()}-${monthStr}`)) {
+            await this.onDateSelect(this.selectedDateStr);
         } else {
             const container = document.getElementById("eventsListContainer");
             if (container) {
-                container.innerHTML = `<div class="empty-notify"><span style="font-size: 2rem;">📅</span><p>Select a date to see details</p></div>`;
+                container.innerHTML = `
+                    <div class="notif-empty">
+                        <div class="notif-empty-icon">
+                            <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <rect x="3" y="4" width="18" height="18" rx="2" stroke="currentColor" stroke-width="1.5"/>
+                                <path d="M16 2V6M8 2V6M3 10H21M8 14H10M12 14H14M8 17H10" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+                            </svg>
+                        </div>
+                        <p>Select a date</p>
+                        <span>Click any calendar day to see details</span>
+                    </div>
+                `;
+                const eventsCountBadge = document.getElementById("eventsCount");
+                if (eventsCountBadge) eventsCountBadge.innerText = "0";
             }
         }
     }
     
-    nextMonth() {
+    async nextMonth() {
         this.currentDate.setMonth(this.currentDate.getMonth() + 1);
-        this.renderCalendar();
+        await this.renderCalendar();
         
-        const eventsForNextSelected = this.getEventsForDate(this.selectedDateStr);
-        if (eventsForNextSelected.length > 0 || this.selectedDateStr.startsWith(this.currentDate.getFullYear() + "-" + String(this.currentDate.getMonth() + 1).padStart(2, '0'))) {
-            this.onDateSelect(this.selectedDateStr);
+        const monthStr = String(this.currentDate.getMonth() + 1).padStart(2, '0');
+        if (this.selectedDateStr && this.selectedDateStr.startsWith(`${this.currentDate.getFullYear()}-${monthStr}`)) {
+            await this.onDateSelect(this.selectedDateStr);
         } else {
             const container = document.getElementById("eventsListContainer");
             if (container) {
-                container.innerHTML = `<div class="empty-notify"><span style="font-size: 2rem;">📅</span><p>Select a date to see details</p></div>`;
+                container.innerHTML = `
+                    <div class="notif-empty">
+                        <div class="notif-empty-icon">
+                            <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <rect x="3" y="4" width="18" height="18" rx="2" stroke="currentColor" stroke-width="1.5"/>
+                                <path d="M16 2V6M8 2V6M3 10H21M8 14H10M12 14H14M8 17H10" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+                            </svg>
+                        </div>
+                        <p>Select a date</p>
+                        <span>Click any calendar day to see details</span>
+                    </div>
+                `;
+                const eventsCountBadge = document.getElementById("eventsCount");
+                if (eventsCountBadge) eventsCountBadge.innerText = "0";
             }
         }
     }
     
-    addQuickReservation() {
-        const newDueDate = this.selectedDateStr && this.selectedDateStr !== "" ? this.selectedDateStr : this.formatYMD(new Date());
-        const newId = this.libraryEvents.length + 10;
-        const newReservation = {
-            id: newId,
-            title: "New Reservation",
-            type: "reservation",
-            dueDate: newDueDate,
-            patron: "Current User",
-            bookTitle: `Reserved Book #${newId}`
-        };
+    async init() {
+        await this.renderCalendar();
         
-        this.libraryEvents.push(newReservation);
-        this.updateStats();
-        this.renderCalendar();
-        this.onDateSelect(newDueDate);
-        
-        const panelHeader = document.querySelector(".panel-header");
-        if (panelHeader) {
-            const originalBg = panelHeader.style.backgroundColor;
-            panelHeader.style.transition = "0.2s";
-            panelHeader.style.backgroundColor = "#fff2e0";
-            setTimeout(() => {
-                panelHeader.style.backgroundColor = "";
-                panelHeader.style.transition = "";
-            }, 400);
-        }
-    }
-    
-    init() {
-        this.updateStats();
-        this.renderCalendar();
-        this.onDateSelect(this.selectedDateStr);
+        const today = new Date();
+        await this.onDateSelect(this.formatYMD(today));
         
         const prevBtn = document.getElementById("prevMonthBtn");
         const nextBtn = document.getElementById("nextMonthBtn");
-        const reserveBtn = document.getElementById("quickReserveBtn");
         
         if (prevBtn) {
+            prevBtn.removeEventListener("click", this.prevMonth);
             prevBtn.addEventListener("click", () => this.prevMonth());
         }
         if (nextBtn) {
+            nextBtn.removeEventListener("click", this.nextMonth);
             nextBtn.addEventListener("click", () => this.nextMonth());
-        }
-        if (reserveBtn) {
-            reserveBtn.addEventListener("click", () => this.addQuickReservation());
         }
     }
 }
