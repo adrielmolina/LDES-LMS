@@ -35,15 +35,14 @@ SQL_DB = os.getenv('SQL_DB')
 # todo remove on deployment
 # print(f'SQL CONNECTION DEBUG\nHost={SQL_HOST}\nUser={SQL_USER}\nPass={SQL_PASS}\nDB={SQL_DB}')
 
-DB_PATH = Path("sql/LDES-LMS.db")
+DB_PATH = Path(os.environ.get('DB_PATH', 'sql/LDES-LMS.db'))
+
 def conn_init():
     if not DB_PATH.exists():
         raise FileNotFoundError("Database not found. Run init_db.py first.")
-
     conn = sqlite3.connect(DB_PATH)
     conn.row_factory = sqlite3.Row
     conn.execute("PRAGMA foreign_keys = ON;")
-
     return conn
     '''
     try:
@@ -77,15 +76,18 @@ def conn_init():
         return None
     '''
 
+'''
+# not needed anymore
 # TODO replace all session binds with SessionLocal
 conn = conn_init()
 SessionLocal = scoped_session(sessionmaker(bind=conn))
 # db_session = SessionLocal() # Use this for queries
 
+
 def shutdown_session():
     """Remove session (for Flask teardown)"""
     SessionLocal.remove()
-
+'''
 
 
 

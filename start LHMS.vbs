@@ -1,0 +1,1 @@
+CreateObject("WScript.Shell").Run "cmd /c LHMS.bat", 0, False

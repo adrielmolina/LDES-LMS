@@ -2,7 +2,6 @@ from flask import Flask, request, render_template, redirect, url_for, flash, ses
 from flask_login import LoginManager, login_user, login_required, logout_user, current_user
 from livereload import Server
 from py_scripts import db_conn, tools, models
-from py_scripts.db_conn import SessionLocal
 from datetime import date, datetime, timedelta
 from sqlalchemy import create_engine, text, func, extract, case, case, and_, or_
 import os
@@ -27,10 +26,12 @@ if cache_bypass or os.getenv("FLASK_ENV") == "production":
 else:
     server.config['SEND_FILE_MAX_AGE_DEFAULT'] = 0
 
+'''
+# not needed anymore
 # for closing the session after requests
 @server.teardown_appcontext
 def cleanup(exception=None):
-    db_conn.shutdown_session()
+    db_conn.shutdown_session()'''
 
 #? -------------------- LOGIN / LOGOUT -------------------- ?#
 
