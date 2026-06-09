@@ -216,7 +216,7 @@
                         </div>
 
                     </div>
-                    <!-- TODO fix pasting from excel doesnt include everything. only 82/264 rows was copied when i tried -->
+        
                     <!-- Row 4 -->
                     <div class="row">
 
@@ -560,7 +560,10 @@
           columns: [13,14], // indexes of columns you want hidden
           indicators: true   // optional: hides little UI markers
         },
-
+        copyPaste: {
+            rowsLimit: 10000,
+            columnsLimit: 100,
+        },
 
         // Auto new row
         minSpareRows: 1

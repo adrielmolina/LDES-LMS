@@ -148,11 +148,12 @@ def update_category(id):
             (name, id)
         )
         conn.commit()
-
+        action_log(action="Update Category", desc=f"Category {id} updated: {name}", conn=conn)
         return jsonify({"success": True})
 
     except Exception as e:
         print("DB ERROR:", e)
+        action_log(action="Update Category Failed", desc=f"Failed to update category {id} to {name}. Error: {str(e)}", conn=conn)
         return jsonify({"error": str(e)}), 500
     
     finally:
@@ -168,10 +169,12 @@ def delete_category(id):
         cursor.execute("DELETE FROM categories WHERE category_id = ?", (id,))
         conn.commit()
 
+        action_log(action="Delete Category", desc=f"Category deleted: {id}", conn=conn)
         return jsonify({"success": True})
 
     except Exception as e:
         print("DB ERROR:", e)
+        action_log(action="Delete Category Failed", desc=f"Failed to delete category {id}. Error: {str(e)}", conn=conn)
         return jsonify({"error": str(e)}), 500    
     
     finally:
@@ -299,6 +302,11 @@ def create_book():
 
         conn.commit()
 
+        action_log(
+            action="Add Book",
+            desc=f"Book added: {title} by {author}",
+            conn=conn
+        )
         return jsonify({
             "success": True,
             "book_id": cursor.lastrowid
@@ -306,6 +314,11 @@ def create_book():
 
     except Exception as e:
         print("DB ERROR:", e)
+        action_log(
+            action="Add Book Failed",
+            desc=f"Failed to add book: {title}) by {author}. Error: {str(e)}",
+            conn=conn
+        )
         return jsonify({"error": str(e)}), 500
 
     finally:
@@ -358,6 +371,11 @@ def create_book_form():
 
         book_id = cursor.lastrowid
 
+        action_log(
+            action="Add Book Form",
+            desc=f"Book added via form: {data.get('title', '').strip().title()} by {data.get('author', '').strip().title()}",
+            conn=conn
+        )
         return jsonify({
             "success": True,
             "book_id": book_id
@@ -365,6 +383,11 @@ def create_book_form():
 
     except Exception as e:
         conn.rollback()
+        action_log(
+            action="Add Book Form Failed",
+            desc=f"Failed to add book via form: {data.get('title', '').strip().title()} by {data.get('author', '').strip().title()}. Error: {str(e)}",
+            conn=conn
+        )
         print("DB ERROR:", e)
 
         return jsonify({"error": str(e)}), 500
@@ -419,9 +442,19 @@ def update_book(book_id):
         query = f"UPDATE books SET {field} = ?, last_updated_at = ? WHERE book_id = ?"  # 👈 changed
         cursor.execute(query, (value, today, book_id))  # 👈 changed
         conn.commit()
+        action_log(
+            action="Update Book",
+            desc=f"Book {book_id} updated: {field} = {value}",
+            conn=conn
+        )
         return jsonify({"success": True})
     except Exception as e:
         print("DB ERROR:", e)
+        action_log(
+            action="Update Book Failed",
+            desc=f"Book {book_id} update failed: {field} = {value}. Error: {str(e)}",
+            conn=conn
+        )
         return jsonify({"error": str(e)}), 500
     finally:
         conn.close()
@@ -435,9 +468,19 @@ def delete_book(book_id):
         print("Deleting book with ID:", book_id)
         cursor.execute("DELETE FROM books WHERE book_id = ?", (book_id,))
         conn.commit()
+        action_log(
+            action="Delete Book",
+            desc=f"Book {book_id} deleted",
+            conn=conn
+        )
         return jsonify({"success": True})
     except Exception as e:
         print("DB ERROR:", e)
+        action_log(
+            action="Delete Book Failed",
+            desc=f"Book {book_id} delete failed. Error: {str(e)}",
+            conn=conn
+        )
         return jsonify({"error": str(e)}), 500
     finally:
         conn.close()
@@ -529,6 +572,11 @@ def get_dashboard_stats():
         })
         
     except Exception as e:
+        action_log(
+            action="Get Dashboard Stats Failed",
+            desc=f"Failed to get dashboard stats. Error: {str(e)}",
+            conn=conn
+        )
         print(f"Dashboard stats error: {e}")
         import traceback
         traceback.print_exc()
@@ -631,7 +679,7 @@ def get_notifications():
                 "due_date": row["due_date"],
                 "copies": row["no_of_copies"],
                 "message": f"'{row['title']}' is due today!" if row["status"] == "borrowed" 
-                          else f"'{row['title']}' is OVERDUE!"
+                else f"'{row['title']}' is OVERDUE!"
             })
         
         return jsonify({
@@ -774,7 +822,8 @@ def borrow_book():
         # -----------------------------
         action_log(
             action="Borrow Book",
-            desc=f"{borrower_name} borrowed {no_of_copies} copy/copies of book {book_id}"
+            desc=f"{borrower_name} borrowed {no_of_copies} copy/copies of book {book_id}",
+            conn=conn
         )
 
         return jsonify({"success": True})
@@ -784,7 +833,8 @@ def borrow_book():
 
         action_log(
             action="Borrow Failed",
-            desc=f"Book {book_id} borrow failed: {str(e)}"
+            desc=f"Book {book_id} borrow failed: {str(e)}",
+            conn=conn
         )
 
         return jsonify({"error": str(e)}), 500
@@ -826,7 +876,8 @@ def mark_lost(borrow_id):
 
         action_log(
             action="Mark Lost",
-            desc=f"Borrow record {borrow_id} marked as lost"
+            desc=f"Borrow record {borrow_id} marked as lost",
+            conn=conn
         )
 
         return jsonify({"success": True})
@@ -836,7 +887,8 @@ def mark_lost(borrow_id):
 
         action_log(
             action="Mark Lost Failed",
-            desc=f"Borrow {borrow_id} failed: {str(e)}"
+            desc=f"Borrow {borrow_id} failed: {str(e)}",
+            conn=conn
         )
 
         return jsonify({"error": str(e)}), 500
@@ -890,7 +942,8 @@ def renew_borrow(borrow_id):
 
         action_log(
             action="Renew Borrow",
-            desc=f"Borrow {borrow_id} renewed (count {renewal_count + 1})"
+            desc=f"Borrow {borrow_id} renewed (count {renewal_count + 1})",
+            conn=conn
         )
 
         return jsonify({"success": True})
@@ -900,7 +953,8 @@ def renew_borrow(borrow_id):
 
         action_log(
             action="Renew Failed",
-            desc=f"Borrow {borrow_id} renew failed: {str(e)}"
+            desc=f"Borrow {borrow_id} renew failed: {str(e)}",
+            conn=conn
         )
 
         return jsonify({"error": str(e)}), 500
@@ -950,7 +1004,8 @@ def return_borrow(borrow_id):
 
         action_log(
             action="Return Book",
-            desc=f"Borrow {borrow_id} marked as returned"
+            desc=f"Borrow {borrow_id} marked as returned",
+            conn=conn
         )
 
         return jsonify({"success": True})
@@ -960,8 +1015,10 @@ def return_borrow(borrow_id):
 
         action_log(
             action="Return Failed",
-            desc=f"Borrow {borrow_id} return failed: {str(e)}"
+            desc=f"Borrow {borrow_id} return failed: {str(e)}",
+            conn=conn
         )
+        
 
         return jsonify({"error": str(e)}), 500
 
@@ -1050,7 +1107,8 @@ def update_status(borrow_id):
 
         action_log(
             action=f"Borrow {action.capitalize()}",
-            desc=f"Borrow {borrow_id} → {action}"
+            desc=f"Borrow {borrow_id} → {action}",
+            conn=conn
         )
 
         return jsonify({"success": True})
@@ -1125,14 +1183,47 @@ def delete_borrow(borrow_id):
 
         conn.commit()
 
+        action_log(
+            action="Delete Borrow",
+            desc=f"Borrow {borrow_id} deleted",
+            conn=conn
+        )
+
         return jsonify({"success": True})
 
     except Exception as e:
         conn.rollback()
+        action_log(
+            action="Delete Borrow Failed",
+            desc=f"Borrow {borrow_id} delete failed: {str(e)}",
+            conn=conn
+        )
         return jsonify({"error": str(e)}), 500
 
     finally:
         conn.close()
+        
+
+
+@server.route("/api/logs", methods=["GET"])
+def get_logs():
+    conn = db_conn.conn_init()
+    cursor = conn.cursor()
+    try:
+        cursor.execute("""
+            SELECT log_id, log_time, action_name, description
+            FROM logs
+            ORDER BY log_id DESC
+        """)
+        rows = cursor.fetchall()
+        data = [dict(row) for row in rows]
+        return jsonify({"data": data})
+    except Exception as e:
+        print("DB ERROR:", e)
+        return jsonify({"error": str(e)}), 500
+    finally:
+        conn.close()
+
 
 #? -------------------- END -------------------- ?#
 
