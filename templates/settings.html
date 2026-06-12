@@ -52,7 +52,7 @@
         </div>
 
         <!-- 3. KEYBINDS -->
-        <div class="settings-section">
+        <div class="settings-section" hidden>
             <h2 class="section-header">Keybind & Controls</h2>
             <div class="section-content">
                 <div class="form-group">
@@ -63,10 +63,37 @@
         </div>
 
         <!-- 4. EXTRA / PLACEHOLDER -->
-        <div class="settings-section">
+        <div class="settings-section" hidden>
             <h2 class="section-header">Other</h2>
             <div class="section-content">
                 <p class="placeholder-text">More settings coming soon...</p>
+            </div>
+        </div>
+        
+        <!-- Backup Section -->
+        <div class="card mb-3">
+            <div class="card-header">
+                <h5 class="mb-0">Database Backup</h5>
+            </div>
+            <div class="card-body">
+                <!-- Manual Backup -->
+                <div class="mb-3">
+                    <button onclick="triggerBackup()" class="btn btn-success btn-sm">
+                        <i class="bi bi-database-add"></i> Backup Now
+                    </button>
+                    <small class="text-muted ms-2">Automatic backups run at 11:00 AM and 4:00 PM daily.</small>
+                </div>
+
+                <!-- Restore -->
+                <div class="d-flex gap-2 align-items-center">
+                    <select id="backupSelect" class="form-select form-select-sm" style="max-width: 400px;">
+                        <option value="">Select a backup to restore...</option>
+                    </select>
+                    <button onclick="restoreBackup()" class="btn btn-warning btn-sm">
+                        <i class="bi bi-arrow-counterclockwise"></i> Restore
+                    </button>
+                </div>
+                <small class="text-muted">Restoring will restart the app.</small>
             </div>
         </div>
 
@@ -75,4 +102,5 @@
 {% endblock %}
 
 {% block extra_scripts %}
+    <script src="{{ url_for('static', filename='js/backup.js') }}"></script>
 {% endblock %}

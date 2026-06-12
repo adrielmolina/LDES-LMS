@@ -12,6 +12,11 @@ from io import BytesIO
 from flask import send_file
 import requests
 import re
+from py_scripts.backup import create_backup, schedule_backups
+import shutil
+from pathlib import Path
+
+schedule_backups()  # start backup scheduler in background
 
 
 server = Flask(__name__)
@@ -33,7 +38,71 @@ else:
 def cleanup(exception=None):
     db_conn.shutdown_session()'''
 
-#? -------------------- LOGIN / LOGOUT -------------------- ?#
+#? -------------------- DB BACKUP -------------------- ?#
+
+@server.route("/api/backups", methods=["GET"])
+def get_backups():
+    try:
+        backup_dir = Path("backups")
+        backup_dir.mkdir(exist_ok=True)
+        
+        files = sorted(backup_dir.glob("*_LDES_backup.db"), reverse=True)
+        data = [{"filename": f.name, "size_kb": round(f.stat().st_size / 1024, 1)} for f in files]
+        
+        return jsonify({"data": data})
+    except Exception as e:
+        print("DB ERROR:", e)
+        return jsonify({"error": str(e)}), 500
+
+
+@server.route("/api/backups/trigger", methods=["POST"])
+def trigger_backup():
+    try:
+        from py_scripts.backup import create_backup
+        filename = create_backup()
+        if not filename:
+            return jsonify({"error": "Backup failed"}), 500
+        
+        action_log(
+            action="Manual Backup",
+            desc=f"Manual backup created: {filename}"
+        )
+        return jsonify({"success": True, "filename": filename})
+    except Exception as e:
+        print("DB ERROR:", e)
+        return jsonify({"error": str(e)}), 500
+
+
+@server.route("/api/backups/restore", methods=["POST"])
+def restore_backup():
+    data = request.get_json()
+    filename = data.get("filename")
+
+    if not filename:
+        return jsonify({"error": "Filename required"}), 400
+
+    try:
+        backup_path = Path("backups") / filename
+        db_path = Path(os.environ.get('DB_PATH', 'sql/LDES-LMS.db'))
+
+        if not backup_path.exists():
+            return jsonify({"error": "Backup file not found"}), 404
+
+        # create a safety backup before restoring
+        from py_scripts.backup import create_backup
+        create_backup()
+
+        shutil.copy2(backup_path, db_path)
+
+        action_log(
+            action="Restore Backup",
+            desc=f"Database restored from: {filename}"
+        )
+        return jsonify({"success": True})
+    except Exception as e:
+        print("DB ERROR:", e)
+        return jsonify({"error": str(e)}), 500
+
 
 #? -------------------- END -------------------- ?#
 
