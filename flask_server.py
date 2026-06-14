@@ -15,6 +15,7 @@ import re
 from py_scripts.backup import create_backup, schedule_backups
 import shutil
 from pathlib import Path
+import socket
 
 schedule_backups()  # start backup scheduler in background
 
@@ -24,7 +25,7 @@ server.jinja_env.auto_reload = True
 server.secret_key = os.urandom(24)
 
 # CACHE CONTROL FOR STATIC FILES
-cache_bypass = False
+cache_bypass = True
 
 if cache_bypass or os.getenv("FLASK_ENV") == "production":
     server.config['SEND_FILE_MAX_AGE_DEFAULT'] = 31536000
@@ -563,8 +564,9 @@ def get_dashboard_stats():
     
     try:
         # 1. Total books (sum of all copies)
+        # changed to count of all titles instead of sum of copies to better reflect the collection size rather than stock
         cursor.execute("""
-            SELECT COALESCE(SUM(total_copies), 0) as total
+            SELECT COUNT(title) as total
             FROM books
         """)
         total_books = cursor.fetchone()[0] or 0
@@ -580,16 +582,17 @@ def get_dashboard_stats():
         # 3. Total currently overdue books (NOT returned yet)
         # This only counts books with status = 'overdue'
         cursor.execute("""
-            SELECT COALESCE(SUM(no_of_copies), 0) as total
+            SELECT COUNT(id) as total
             FROM circulations
             WHERE status = 'overdue'
+            AND return_date IS NULL
         """)
         total_overdue = cursor.fetchone()[0] or 0
         
         # Additional check: Also count books past due date but status not updated
         # This ensures accuracy even if the status hasn't been updated
         cursor.execute("""
-            SELECT COALESCE(SUM(no_of_copies), 0) as total
+            SELECT COUNT(*) as total
             FROM circulations
             WHERE status IN ('borrowed', 'overdue')
             AND due_date < DATE('now')
@@ -1369,6 +1372,17 @@ def action_log(action=None, desc=None, conn=None):
             conn.close()
         
         
+def find_free_port(start=5000, end=5100):
+    for port in range(start, end):
+        with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
+            try:
+                s.bind(("127.0.0.1", port))
+                return port
+            except OSError:
+                continue
+    raise RuntimeError("No free port found")        
+        
+
 #? -------------------- END -------------------- ?#
 
 if __name__ == '__main__':
@@ -1384,6 +1398,8 @@ if __name__ == '__main__':
     '''
     print("FLASK_ENV:", os.getenv("FLASK_ENV"))
     
+    # removed to automate available  port detection
+    '''
     if os.getenv("FLASK_ENV") == "production":
         #server.run(host="0.0.0.0", port=5000)
         pass
@@ -1393,3 +1409,19 @@ if __name__ == '__main__':
         flask_server.watch('static/*.*')
         flask_server.watch('templates/*.html')
         flask_server.serve(port=5000, host="127.0.0.1")
+    '''
+    
+    port = find_free_port()
+    print(f"Starting on port: {port}")
+    
+    import tempfile, json
+    port_file = Path(tempfile.gettempdir()) / "ldes_port.json"
+    port_file.write_text(json.dumps({"port": port}))
+
+    if os.getenv("FLASK_ENV") == "development":
+        flask_server = Server(server.wsgi_app)
+        flask_server.watch('static/*.*')
+        flask_server.watch('templates/*.html')
+        flask_server.serve(port=port, host="127.0.0.1")
+    else:
+        server.run(host="127.0.0.1", port=port)

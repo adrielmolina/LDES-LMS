@@ -271,7 +271,7 @@
 {% endblock %}
 
 {% block extra_scripts %}
-    <script src="https://cdn.jsdelivr.net/npm/exceljs/dist/exceljs.min.js"></script>
+
     <script src="{{ url_for('static', filename='js/exportExcelBooks.js') }}"></script>
     <script src="{{ url_for('static', filename='js/genreCRUD.js') }}"></script>
     <script src="{{ url_for('static', filename='js/searchBar.js') }}"></script>
@@ -410,7 +410,6 @@
             { data: 'no_of_pages', type: 'numeric' }
         ],
         afterChange: function (changes, source) {
-            
             if (!changes || source === 'loadData' || source === 'internal') return;
 
             changes.forEach(([row, prop, oldVal, newVal]) => {

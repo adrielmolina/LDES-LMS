@@ -1,6 +1,20 @@
+const fs = require('fs');
+const os = require('os');
+const path = require('path');
+
+function getFlaskPort() {
+    try {
+        const portFile = path.join(os.tmpdir(), 'ldes_port.json');
+        const data = JSON.parse(fs.readFileSync(portFile));
+        return data.port;
+    } catch {
+        return 5000; // fallback
+    }
+}
+
+
 const { app, BrowserWindow } = require('electron');
 const { spawn } = require('child_process');
-const path = require('path');
 const http = require('http');
 
 let flaskProcess = null;
@@ -25,7 +39,8 @@ function startFlask() {
 }
 
 function waitForFlask(callback, retries = 20) {
-    http.get(`http://127.0.0.1:${FLASK_PORT}/`, res => {
+    const port = getFlaskPort();
+    http.get(`http://127.0.0.1:${port}/`, res => {
         callback();
     }).on('error', () => {
         if (retries === 0) {
@@ -36,6 +51,8 @@ function waitForFlask(callback, retries = 20) {
     });
 }
 function createWindow() {
+    const port = getFlaskPort(); // 👈 add this
+
     mainWindow = new BrowserWindow({
         width: 1280,
         height: 800,
@@ -46,15 +63,13 @@ function createWindow() {
         icon: path.join(app.getAppPath(), 'static', 'assets', 'favicon.png'),
         title: 'LDES-LMS'
     });
-
-    mainWindow.loadURL(`http://127.0.0.1:${FLASK_PORT}/`);
-    mainWindow.setMenuBarVisibility(false); // hide default menu bar
+    mainWindow.loadURL(`http://127.0.0.1:${port}/`); // 👈 changed from FLASK_PORT
+    mainWindow.setMenuBarVisibility(false);
     mainWindow.maximize();
 
-    // open target="_blank" links in default browser
     mainWindow.webContents.setWindowOpenHandler(({ url }) => {
-        require('electron').shell.openExternal(url);
-        return { action: 'deny' }; // prevent Electron from opening it
+        require('electron').shell.openExternal(`http://127.0.0.1:${port}/`); // 👈 changed
+        return { action: 'deny' };
     });
 }
 

@@ -191,7 +191,6 @@
 
 
 {% block extra_scripts %}
-    <script src="https://cdn.jsdelivr.net/npm/exceljs/dist/exceljs.min.js"></script>
     <script src="{{ url_for('static', filename='js/excelExportsBorrow.js') }}"></script>
     <script src="{{ url_for('static', filename='js/booksList.js') }}"></script>
     <script src="{{ url_for('static', filename='js/borrowActions.js') }}"></script>
@@ -406,7 +405,7 @@
             const now = new Date();
 
             borrowDateInput.value = formatLocalDate(now);
-            dueDateInput.value = formatLocalDate(addDays(now, 7));
+            dueDateInput.value = formatLocalDate(addDays(now, 30));
         });
 
         // 👇 borrow date edited → due date auto-updates
@@ -414,7 +413,7 @@
             if (!this.value) return;
 
             const selectedBorrowDate = new Date(this.value + "T00:00:00");
-            dueDateInput.value = formatLocalDate(addDays(selectedBorrowDate, 7));
+            dueDateInput.value = formatLocalDate(addDays(selectedBorrowDate, 30));
         });
 
 
